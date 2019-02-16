@@ -1,0 +1,58 @@
+﻿<UserControl x:Class="Mago.FindByName"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Mago"
+             mc:Ignorable="d" 
+             d:DesignHeight="728" d:DesignWidth="1366">
+    <StackPanel
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center">
+        <TextBox
+            materialDesign:HintAssist.Hint="FIND MANGA BY NAME"
+            materialDesign:TextFieldAssist.TextBoxViewMargin="2 0 2 0"
+            materialDesign:HintAssist.FloatingScale="0.70"
+            Foreground="{DynamicResource PrimaryHueMidBrush}"
+            Text="{Binding FindByViewModel.MangaName}"
+            Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+            FontSize="26"
+            Margin="0, 10"/>
+        <ComboBox
+            materialDesign:HintAssist.Hint="FROM SOURCE"
+            materialDesign:HintAssist.FloatingScale="0.70"
+            materialDesign:TextFieldAssist.TextBoxViewMargin="2 10 2 0"
+            Foreground="{DynamicResource PrimaryHueMidBrush}"
+            FontSize="26"
+            Margin="0, 10"
+            IsEditable="False"
+            SelectedIndex="{Binding FindByViewModel.SelectedIndex}"
+            ItemsSource="{Binding FindByViewModel.SuitableMangaSources}"
+            Style="{StaticResource MaterialDesignFloatingHintComboBox}">
+            <ComboBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel/>
+                </ItemsPanelTemplate>
+            </ComboBox.ItemsPanel>
+        </ComboBox>
+        <materialDesign:PackIcon
+            Kind="Warning"
+            HorizontalAlignment="Center"
+            Foreground="Red"
+            ToolTip="Not valid"
+            Visibility="{Binding FindByViewModel.WarningIconVisibility}"/>
+        <Button
+            Command="{Binding FindByViewModel.FindByName}"
+            IsEnabled="{Binding FindByViewModel.NameButtonEnabled}"
+            Width="140"
+            Height="40"
+            FontSize="20"
+            Margin="0,10,0,0"
+            materialDesign:ButtonProgressAssist.IsIndicatorVisible="True"
+            materialDesign:ButtonProgressAssist.Value="-1"
+            materialDesign:ButtonProgressAssist.IsIndeterminate="{Binding FindByViewModel.NameIsIndeterminate}">
+            SEARCH
+        </Button>
+    </StackPanel>
+</UserControl>

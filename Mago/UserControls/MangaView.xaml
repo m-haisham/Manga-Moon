@@ -1,0 +1,214 @@
+﻿<UserControl x:Class="Mago.MangaView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Mago"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="728" d:DesignWidth="1366">
+    <DockPanel
+        Margin="0, 15"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Top">
+        <ScrollViewer
+            VerticalScrollBarVisibility="Hidden">
+            <Border
+                Padding="5">
+                <DockPanel>
+                    <materialDesign:Card
+                        Padding="5"
+                        DockPanel.Dock="Top">
+                        <DockPanel>
+                            <ToggleButton
+                                DockPanel.Dock="Right"
+                                IsChecked="{Binding MangaViewModel.IsFavourite, Mode=TwoWay}"
+                                Style="{StaticResource MaterialDesignActionToggleButton}"
+                                Background="Transparent">
+                                <materialDesign:PackIcon Kind="FavoriteOutline" Width="30" Height="30" Foreground="DeepPink"/>
+                                <materialDesign:ToggleButtonAssist.OnContent>
+                                    <materialDesign:PackIcon Kind="Favorite" Width="30" Height="30" Foreground="DeepPink"/>
+                                </materialDesign:ToggleButtonAssist.OnContent>
+                            </ToggleButton>
+                            <StackPanel
+                                VerticalAlignment="Center"
+                                Margin="20,0,0,0">
+                                <TextBlock
+                                Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                FontWeight="Bold"
+                                Text="{Binding MangaViewModel.Name}"/>
+                            </StackPanel>
+                        </DockPanel>
+                    </materialDesign:Card>
+                    <Grid
+                        DockPanel.Dock="Bottom"
+                        Margin="0,10,0,0">
+                        <materialDesign:Card>
+                            <DockPanel>
+                                <StackPanel
+                                     Orientation="Horizontal"
+                                     DockPanel.Dock="Top">
+                                    <StackPanel
+                                        Width="300">
+                                        <Border
+                                            Padding="20">
+                                            <materialDesign:Card>
+                                                <Image
+                                                Source="{Binding MangaViewModel.ImageSource}"
+                                                Stretch="UniformToFill"/>
+                                            </materialDesign:Card>
+                                        </Border>
+                                    </StackPanel>
+                                    <DockPanel>
+                                        <StackPanel
+                                            DockPanel.Dock="Bottom">
+                                            <Button
+                                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                                Content="{Binding MangaViewModel.ReadStatus}"
+                                                Margin="20"/>
+                                            <StackPanel
+                                                Margin="0,0,0,0">
+                                                <TextBlock
+                                                    Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                                    Text="Authors"
+                                                    Margin="5"
+                                                    TextAlignment="Center"/>
+                                                <ListView
+                                                    materialDesign:ListViewAssist.ListViewItemPadding="5"
+                                                    HorizontalContentAlignment="Center"
+                                                    ItemsSource="{Binding MangaViewModel.AuthorList}"/>
+                                            </StackPanel>
+                                            <StackPanel
+                                                Orientation="Horizontal"
+                                                Margin="10">
+                                                <materialDesign:Chip
+                                                    Margin="5">
+                                                    <StackPanel
+                                                        Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding MangaViewModel.ChapterList.Count}" Foreground="{StaticResource PrimaryHueMidBrush}"/>
+                                                        <TextBlock Text="Chapters" Margin="5,0,0,0"/>
+                                                    </StackPanel>
+                                                </materialDesign:Chip>
+                                                <materialDesign:Chip
+                                                    Margin="5">
+                                                    <TextBlock Text="{Binding MangaViewModel.MangaStatus}"/>
+                                                </materialDesign:Chip>
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <StackPanel/>
+                                    </DockPanel>
+                                </StackPanel>
+                                <Expander
+                                    IsExpanded="True"
+                                    Header="GENRE"
+                                    Margin="5"
+                                    DockPanel.Dock="Top">
+                                    <ItemsControl
+                                        ItemsSource="{Binding MangaViewModel.GenreList}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel
+                                                    FlowDirection="LeftToRight"
+                                                    Margin="20,0,20,10"
+                                                    MaxWidth="450"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate
+                                                DataType="{x:Type local:GenreItemViewModel}">
+                                                <materialDesign:Chip
+                                                    Background="{DynamicResource PrimaryHueMidBrush}"
+                                                    Margin="5">
+                                                    <TextBlock Text="{Binding Text}"/>
+                                                </materialDesign:Chip>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Expander>
+                                <Expander
+                                    IsExpanded="True"
+                                    Header="DESCRIPTION"
+                                    Margin="5"
+                                    DockPanel.Dock="Top">
+                                    <TextBlock
+                                        Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                        Margin="20,0,20,10"
+                                        TextWrapping="Wrap"
+                                        HorizontalAlignment="Center"
+                                        MaxWidth="450"
+                                        Text="{Binding MangaViewModel.Description}"/>
+                                </Expander>
+                                <Expander
+                                    IsExpanded="False"
+                                    Margin="5"
+                                    Header="CHAPTER LIST">
+                                    <StackPanel
+                                        Margin="20,0,20,10">
+                                        <StackPanel
+                                            HorizontalAlignment="Right">
+                                            <Button
+                                                Command="{Binding MangaViewModel.DownloadSelected}"
+                                                Style="{StaticResource MaterialDesignFlatButton}"
+                                                Padding="2">
+                                                <materialDesign:PackIcon Kind="DownloadMultiple" Width="30" Height="30"/>
+                                            </Button>
+                                        </StackPanel>
+                                        <ItemsControl
+                                            ItemsSource="{Binding MangaViewModel.ChapterList}"
+                                            Grid.IsSharedSizeScope="True">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate
+                                                    DataType="{x:Type local:ChapterListItemViewModel}">
+                                                    <DockPanel
+                                                        Background="{DynamicResource MaterialDesignPaper}">
+                                                        <ToggleButton
+                                                            DockPanel.Dock="Right"
+                                                            IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                            Style="{StaticResource MaterialDesignActionToggleButton}"
+                                                            Background="Transparent">
+                                                            <materialDesign:PackIcon Kind="CheckboxBlank" Width="30" Height="30" Foreground="{DynamicResource PrimaryHueLightBrush}"/>
+                                                            <materialDesign:ToggleButtonAssist.OnContent>
+                                                                <materialDesign:PackIcon Kind="CheckboxMarked" Width="30" Height="30" Foreground="{DynamicResource PrimaryHueLightBrush}"/>
+                                                            </materialDesign:ToggleButtonAssist.OnContent>
+                                                        </ToggleButton>
+                                                        <Button
+                                                            Command="{Binding DownloadChapter}"
+                                                            IsEnabled="{Binding IsNotDownloaded, Mode=TwoWay}"
+                                                            DockPanel.Dock="Right"
+                                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                                            Padding="2">
+                                                            <materialDesign:PackIcon Kind="Download" Width="30" Height="30" Foreground="{DynamicResource PrimaryHueLightBrush}"/>
+                                                        </Button>
+                                                        <Button
+                                                             Command="{Binding ReadChapter}"
+                                                             Style="{StaticResource MaterialDesignFlatButton}"
+                                                             HorizontalAlignment="Stretch"
+                                                             HorizontalContentAlignment="Left">
+                                                            <StackPanel
+                                                                VerticalAlignment="Center">
+                                                                <TextBlock x:Name="ChapterName" Foreground="{DynamicResource PrimaryHueMidBrush}" Text="{Binding Name}"/>
+                                                            </StackPanel>
+                                                        </Button>
+                                                    </DockPanel>
+                                                    <DataTemplate.Triggers>
+                                                        <DataTrigger Binding="{Binding IsRead}"
+                                                            Value="True">
+                                                            <Setter
+                                                                TargetName="ChapterName"
+                                                                Property="Foreground"
+                                                                Value="{DynamicResource MaterialDesignBody}"/>
+                                                        </DataTrigger>
+                                                    </DataTemplate.Triggers>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Expander>
+                            </DockPanel>
+                        </materialDesign:Card>
+                    </Grid>
+                </DockPanel>
+            </Border>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

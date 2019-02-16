@@ -1,0 +1,473 @@
+﻿<Window x:Class="Mago.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Mago"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="14"
+        FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto" 
+        mc:Ignorable="d"
+        Title="MainWindow" Height="768" Width="1366" WindowStartupLocation="CenterScreen" WindowStyle="None">
+
+    <materialDesign:DialogHost Identifier="RootDialog" SnackbarMessageQueue="{Binding ElementName=MainSnackbar, Path=MessageQueue}">
+        <materialDesign:DrawerHost IsLeftDrawerOpen="{Binding MenuViewModel.IsMenuOpen}">
+            <materialDesign:DrawerHost.LeftDrawerContent>
+                <DockPanel
+                    Width="200"
+                    DataContext="{Binding MenuViewModel}">
+                    <DockPanel
+                        DockPanel.Dock="Top">
+                        <StackPanel
+                            Orientation="Horizontal"
+                            DockPanel.Dock="Right"
+                            HorizontalAlignment="Center"
+                            Margin="4,5,4,4">
+                            <Button
+                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                Command="{Binding MinimizeCommand}"
+                                materialDesign:RippleAssist.IsCentered="True"
+                                Height="32" Width="32">
+                                <materialDesign:PackIcon Kind="WindowMinimize"/>
+                            </Button>
+                            <ToggleButton
+                                Style="{StaticResource MaterialDesignActionToggleButton}"
+                                materialDesign:ShadowAssist.ShadowDepth="Depth2"
+                                materialDesign:RippleAssist.IsCentered="True"
+                                IsChecked="{Binding IsMaximized}"
+                                Margin="5,0,5,0">
+                                <materialDesign:ToggleButtonAssist.OnContent>
+                                    <materialDesign:PackIcon Kind="WindowRestore"/>
+                                </materialDesign:ToggleButtonAssist.OnContent>
+                                <materialDesign:PackIcon Kind="WindowMaximize"/>
+                            </ToggleButton>
+                            <Button
+                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                Command="{Binding ShutdownCommand}"
+                                materialDesign:RippleAssist.IsCentered="True"
+                                Height="32" Width="32"
+                                Margin="0,0,5,0">
+                                <materialDesign:PackIcon Kind="WindowClose"/>
+                            </Button>
+                        </StackPanel>
+                    </DockPanel>
+                    <DockPanel
+                        Margin="0,40,0,0">
+                        <DockPanel>
+                            <StackPanel
+                                DockPanel.Dock="Bottom"
+                                Margin="0,0,0,30">
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                                    <TextBlock
+                                        Text="DARK THEME"
+                                        Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                        Style="{StaticResource MaterialDesignButtonTextBlock}"
+                                        FontWeight="Bold"/>
+                                    <ToggleButton
+                                        Margin="30,0,0,0"
+                                        IsChecked="{Binding DarkThemeEnabled, Mode=TwoWay}"
+                                        Style="{StaticResource MaterialDesignSwitchAccentToggleButton}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel
+                                DockPanel.Dock="Top">
+                                <Button
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Command="{Binding Recents}">
+                                    <TextBlock
+                                        Text="RECENT"/>
+                                </Button>
+                                <Button
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Margin="0,50,0,0"
+                                    Command="{Binding Home}">
+                                    <TextBlock
+                                        Text="HOME"/>
+                                </Button>
+                                <Button
+                                    Style="{StaticResource MaterialDesignRaisedButton}"
+                                    Margin="0,5,0,0"
+                                    Command="{Binding Settings}">
+                                    <TextBlock
+                                        Text="SETTINGS"/>
+                                </Button>
+                                <Button
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Margin="0,20,0,0"
+                                    Command="{Binding Downloads}">
+                                    <TextBlock
+                                        Text="DOWNLOADS"/>
+                                </Button>
+                                <Button
+                                    Style="{StaticResource MaterialDesignFlatButton}"
+                                    Margin="0,5,0,0"
+                                    Command="{Binding Favourites}">
+                                    <TextBlock
+                                        Text="FAVOURITES"/>
+                                </Button>
+                                <materialDesign:Card
+                                    Margin="0,20,0,0"
+                                    Background="{DynamicResource MaterialDesignBackground}"
+                                    materialDesign:ShadowAssist.ShadowDepth="Depth2">
+                                    <Expander
+                                        Header="FIND MANGA"
+                                        Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                        HorizontalAlignment="Stretch">
+                                        <StackPanel
+                                            Margin="24,8,24,16">
+                                            <Button
+                                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                                Margin="0"
+                                                Command="{Binding Browser}">
+                                                <TextBlock
+                                                    Text="BROWSE"/>
+                                            </Button>
+                                            <Button
+                                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                                Margin="0,5,0,0"
+                                                Command="{Binding Name}">
+                                                <TextBlock
+                                                    Text="NAME"/>
+                                            </Button>
+                                            <Button
+                                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                                Margin="0,5,0,0"
+                                                Command="{Binding URL}">
+                                                <TextBlock
+                                                    Text="URL"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Expander>
+                                </materialDesign:Card>
+                            </StackPanel>
+                        </DockPanel>
+                    </DockPanel>
+                </DockPanel>
+            </materialDesign:DrawerHost.LeftDrawerContent>
+            <Grid>
+                <DockPanel>
+                    <materialDesign:ColorZone
+                        DockPanel.Dock="Top"
+                        Mode="PrimaryDark"
+                        Height="40">
+                        <DockPanel>
+                            <StackPanel
+                                DataContext="{Binding DownloadsPanelViewModel}"
+                                DockPanel.Dock="Right"
+                                Orientation="Horizontal">
+                                <materialDesign:Badged
+                                    Name="DownloadsBadge"
+                                    Badge="{Binding DownloadsPanel.Count}"
+                                    VerticalAlignment="Center"
+                                    Height="24"
+                                    Margin="5,10,5,6"
+                                    Width="30">
+                                    <Button
+                                        Name="DownloadQueueButton"
+                                        Style="{StaticResource MaterialDesignToolButton}"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Width="35"
+                                        Margin="5,0,5,0"
+                                        Command="{Binding DownloadsPanelAnimation}">
+                                        <materialDesign:PackIcon
+                                            Kind="Downloads"
+                                            Width="20"
+                                            Height="20"/>
+                                    </Button>
+                                </materialDesign:Badged>
+                                <materialDesign:Badged
+                                    Name="NotificationsBadge"
+                                    Badge=""
+                                    VerticalAlignment="Center"
+                                    Height="24"
+                                    Margin="5,10,10,6"
+                                    Width="30">
+                                    <Button
+                                        Style="{StaticResource MaterialDesignToolButton}"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Width="35"
+                                        Margin="5,0,5,0">
+                                        <materialDesign:PackIcon
+                                            Kind="Notifications"
+                                            Width="20"
+                                            Height="20"/>
+                                    </Button>
+                                </materialDesign:Badged>
+                            </StackPanel>
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Margin="5,0,0,0">
+                                <ToggleButton
+                                    IsChecked="{Binding MenuViewModel.IsMenuOpen}"
+                                    Style="{DynamicResource MaterialDesignHamburgerToggleButton}" />
+                                <TextBlock
+                                        VerticalAlignment="Center"
+                                        Margin="16 0 0 0">
+                                        MAGO
+                                </TextBlock>
+                            </StackPanel>
+                        </DockPanel>
+                    </materialDesign:ColorZone>
+                    <materialDesign:Transitioner
+                        AutoApplyTransitionOrigins="True"
+                        Panel.ZIndex="-1"
+                        SelectedIndex="9">
+                        <!--SelectedIndex="{Binding MenuViewModel.TransitionIndex}"-->
+                        <materialDesign:TransitionerSlide>
+                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                <materialDesign:SlideOutWipe/>
+                            </materialDesign:TransitionerSlide.ForwardWipe>
+                            <!--Home-->
+                        </materialDesign:TransitionerSlide>
+                        
+                        <materialDesign:TransitionerSlide>
+                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                <materialDesign:SlideOutWipe/>
+                            </materialDesign:TransitionerSlide.ForwardWipe>
+                            <!--Settings-->
+                        </materialDesign:TransitionerSlide>
+                        
+                        <materialDesign:TransitionerSlide>
+                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                <materialDesign:SlideOutWipe/>
+                            </materialDesign:TransitionerSlide.ForwardWipe>
+                            <!--Browser-->
+                            <StackPanel
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                                <TextBlock
+                                    Style="{StaticResource MaterialDesignDisplay1TextBlock}"
+                                    Text="TO BE IMPLEMENTED"/>
+                                <TextBlock
+                                    Style="{StaticResource MaterialDesignTitleTextBlock}"
+                                    TextAlignment="Center"
+                                    Text="Sorry for the inconvenience."/>
+                            </StackPanel>
+                        </materialDesign:TransitionerSlide>
+                        
+                        <materialDesign:TransitionerSlide>
+                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                <materialDesign:SlideOutWipe/>
+                            </materialDesign:TransitionerSlide.ForwardWipe>
+                            <!--Downloads-->
+                        </materialDesign:TransitionerSlide>
+                        
+                        <materialDesign:TransitionerSlide>
+                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                <materialDesign:SlideOutWipe/>
+                            </materialDesign:TransitionerSlide.ForwardWipe>
+                            <!--Favourites-->
+                        </materialDesign:TransitionerSlide>
+                        
+                        <materialDesign:TransitionerSlide>
+                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                <materialDesign:SlideOutWipe/>
+                            </materialDesign:TransitionerSlide.ForwardWipe>
+                            <!--Recents-->
+                        </materialDesign:TransitionerSlide>
+                        
+                        <materialDesign:TransitionerSlide>
+                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                <materialDesign:SlideOutWipe/>
+                            </materialDesign:TransitionerSlide.ForwardWipe>
+                            <!--ByName-->
+                            <local:FindByName/>
+                        </materialDesign:TransitionerSlide>
+                        
+                        <materialDesign:TransitionerSlide>
+                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                <materialDesign:SlideOutWipe/>
+                            </materialDesign:TransitionerSlide.ForwardWipe>
+                            <!--ByURL-->
+                            <local:FindByURL/>
+                        </materialDesign:TransitionerSlide>
+                        
+                        <materialDesign:TransitionerSlide>
+                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                <materialDesign:SlideOutWipe/>
+                            </materialDesign:TransitionerSlide.ForwardWipe>
+                            <!--Info View-->
+                            <local:MangaView/>
+                        </materialDesign:TransitionerSlide>
+                        <materialDesign:TransitionerSlide>
+                            <materialDesign:TransitionerSlide.ForwardWipe>
+                                <materialDesign:SlideOutWipe/>
+                            </materialDesign:TransitionerSlide.ForwardWipe>
+                            <!--chapter View-->
+                            <materialDesign:DrawerHost IsTopDrawerOpen="{Binding ReaderViewModel.IsTopBarOpen, Mode=TwoWay}" Margin="0,0,0,0">
+                                <Grid>
+                                    <ToggleButton
+                                        Name="TopDrawerButton"
+                                        Style="{StaticResource MaterialDesignActionToggleButton}"
+                                        IsChecked="{Binding ReaderViewModel.IsTopBarOpen, Mode=TwoWay}"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Top"
+                                        Margin="10"
+                                        Padding="2"
+                                        Opacity="0.2"
+                                        Panel.ZIndex="5">
+                                        <materialDesign:PackIcon Kind="KeyboardArrowDown" Width="30" Height="30"/>
+                                        <materialDesign:ToggleButtonAssist.OnContent>
+                                            <materialDesign:PackIcon Kind="KeyboardArrowUp" Width="30" Height="30"/>
+                                        </materialDesign:ToggleButtonAssist.OnContent>
+                                        <ToggleButton.Triggers>
+                                            <EventTrigger RoutedEvent="MouseLeave">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation 
+                                                            Storyboard.TargetName="TopDrawerButton"
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            From="1" To="0.2"
+                                                            AccelerationRatio="0.9"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                            <EventTrigger RoutedEvent="MouseEnter">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <DoubleAnimation 
+                                                            Storyboard.TargetName="TopDrawerButton"
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            From="0.2" To="1"
+                                                            AccelerationRatio="0.9"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </ToggleButton.Triggers>
+                                    </ToggleButton>
+                                    <DockPanel>
+                                        <ScrollViewer
+                                            HorizontalAlignment="Stretch"
+                                            VerticalScrollBarVisibility="Auto">
+                                            <StackPanel>
+                                                <0
+                                                    Content="PREVIOUS CHAPTER"
+                                                    FontSize="20"
+                                                    Padding="2"
+                                                    Command="{Binding ReaderViewModel.LoadPrevious}"
+                                                    IsEnabled="{Binding ReaderViewModel.LastChapterExists}"
+                                                    Style="{StaticResource MaterialDesignFlatButton}"/>
+                                                <ItemsControl
+                                                    ItemsSource="{Binding ReaderViewModel.Pages}">
+                                                        <ItemsControl.ItemTemplate>
+                                                        <DataTemplate
+                                                            DataType="{x:Type local:PageViewModel}">
+                                                            <materialDesign:Card
+                                                                Margin="{Binding Margin}"
+                                                                HorizontalAlignment="Center"
+                                                                materialDesign:ShadowAssist.ShadowDepth="Depth0">
+                                                                <Image
+                                                                    Source="{Binding Source}"
+                                                                    Stretch="UniformToFill"
+                                                                    Width="{Binding Width}"/>
+                                                            </materialDesign:Card>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                <Button
+                                                    Content="NEXT CHAPTER"
+                                                    FontSize="20"
+                                                    Padding="2"
+                                                    Command="{Binding ReaderViewModel.LoadNext}"
+                                                    IsEnabled="{Binding ReaderViewModel.NextChapterExists}"
+                                                    Style="{StaticResource MaterialDesignFlatButton}"/>
+                                            </StackPanel>
+                                        </ScrollViewer>
+                                    </DockPanel>
+                                </Grid>
+                                <materialDesign:DrawerHost.TopDrawerContent>
+                                    <DockPanel
+                                        Margin="5"
+                                        Height="40"
+                                        Background="{DynamicResource MaterialDesignPaper}">
+                                        <DockPanel>
+                                            <StackPanel
+                                                Orientation="Horizontal"
+                                                DockPanel.Dock="Right"
+                                                HorizontalAlignment="Center">
+                                                <ComboBox
+                                                    materialDesign:HintAssist.Hint="Zoom %"
+                                                    MinWidth="72"
+                                                    Margin="10 0 10 0"
+                                                    ItemsSource="{Binding ReaderViewModel.Zoom}"
+                                                    Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                                                    SelectedIndex="{Binding ReaderViewModel.SelectedZoomIndex}"
+                                                    VerticalAlignment="Bottom">
+                                                    <ComboBox.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <VirtualizingStackPanel />
+                                                        </ItemsPanelTemplate>
+                                                    </ComboBox.ItemsPanel>
+                                                </ComboBox>
+                                                <ComboBox
+                                                    materialDesign:HintAssist.Hint="Gap"
+                                                    MinWidth="72"
+                                                    Margin="10 0 30 0"
+                                                    ItemsSource="{Binding ReaderViewModel.Margin}"
+                                                    Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                                                    SelectedIndex="{Binding ReaderViewModel.SelectedMarginIndex}"
+                                                    VerticalAlignment="Bottom">
+                                                    <ComboBox.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <VirtualizingStackPanel />
+                                                        </ItemsPanelTemplate>
+                                                    </ComboBox.ItemsPanel>
+                                                </ComboBox>
+                                            </StackPanel>
+                                            <StackPanel
+                                                DockPanel.Dock="Left"
+                                                VerticalAlignment="Center">
+                                                <ComboBox
+                                                    materialDesign:HintAssist.Hint="Now Reading"
+                                                    MinWidth="300"
+                                                    Margin="20 0 20 0"
+                                                    ItemsSource="{Binding ReaderViewModel.ChapterNames}"
+                                                    Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                                                    SelectedIndex="{Binding ReaderViewModel.SelectedChapterIndex}"
+                                                    VerticalAlignment="Bottom">
+                                                    <ComboBox.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <VirtualizingStackPanel />
+                                                        </ItemsPanelTemplate>
+                                                    </ComboBox.ItemsPanel>
+                                                </ComboBox>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </DockPanel>
+                                </materialDesign:DrawerHost.TopDrawerContent>
+                            </materialDesign:DrawerHost>
+                        </materialDesign:TransitionerSlide>
+                    </materialDesign:Transitioner>
+                </DockPanel>
+                <materialDesign:Transitioner
+                    DataContext="{Binding DownloadsPanelViewModel}"
+                    SelectedIndex="{Binding AnimationIndex}"
+                    AutoApplyTransitionOrigins="True">
+                    <materialDesign:TransitionerSlide>
+                        <materialDesign:TransitionerSlide.ForwardWipe>
+                            <materialDesign:SlideWipe
+                                Direction="Left"/>
+                        </materialDesign:TransitionerSlide.ForwardWipe>
+                    </materialDesign:TransitionerSlide>
+
+                    <materialDesign:TransitionerSlide>
+                        <materialDesign:TransitionerSlide.BackwardWipe>
+                            <materialDesign:FadeWipe/>
+                        </materialDesign:TransitionerSlide.BackwardWipe>
+                        <materialDesign:TransitioningContent>
+                            <local:DownloadsQueue
+                                Margin="0,50,10,0"/>
+                        </materialDesign:TransitioningContent>
+                    </materialDesign:TransitionerSlide>
+                </materialDesign:Transitioner>
+            </Grid>
+        </materialDesign:DrawerHost>
+    </materialDesign:DialogHost>
+</Window>
