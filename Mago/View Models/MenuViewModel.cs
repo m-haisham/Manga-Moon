@@ -18,7 +18,7 @@ namespace Mago
 
         private readonly Uri darkTheme = new Uri("pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml");
         private readonly Uri lightTheme = new Uri("pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml");
-        private readonly Page page = new Page();
+        public readonly Page page = new Page();
 
         #region Commands
 
@@ -53,52 +53,62 @@ namespace Mago
             URL = new RelayCommand(OpenByURL);
         }
 
-        private void OpenRecents()
+        public void OpenRecents()
         {
             TransitionIndex = page.Recents;
         }
 
-        private void OpenHome()
+        public void OpenHome()
         {
             TransitionIndex = page.Home;
         }
 
-        private void OpenSettings()
+        public void OpenSettings()
         {
             TransitionIndex = page.Settings;
         }
 
-        private void OpenBrowser()
+        public void OpenBrowser()
         {
             TransitionIndex = page.Browser;
         }
 
-        private void OpenDownloads()
+        public void OpenDownloads()
         {
             TransitionIndex = page.Downloads;
         }
 
-        private void OpenFavourites()
+        public void OpenFavourites()
         {
             TransitionIndex = page.Favourites;
         }
 
-        private void OpenByName()
+        public void OpenByName()
         {
             TransitionIndex = page.ByName;
         }
 
-        private void OpenByURL()
+        public void OpenByURL()
         {
             TransitionIndex = page.ByURL;
         }
 
-        private void Minimize()
+        public void OpenInfoView()
+        {
+            TransitionIndex = page.MangaInfoView;
+        }
+
+        public void OpenReader()
+        {
+            TransitionIndex = page.MangaReader;
+        }
+
+        public void Minimize()
         {
             Application.Current.MainWindow.WindowState = WindowState.Minimized;
         }
 
-        private void changeDark()
+        private void ChangeDark()
         {
             Application.Current.Resources.MergedDictionaries[0].Source = new Uri("pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml");
         }

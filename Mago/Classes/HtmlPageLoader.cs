@@ -107,7 +107,7 @@ namespace Mago
             #region Save Data
             _name = name;
             _status = status;
-            _image = MangaView.GetImageArray(imageSource).ToBitmapImage();
+            _image = imageSource.ToFreezedBitmapImage();
             _description = description;
             
             _authorList = authors;
@@ -138,6 +138,8 @@ namespace Mago
 
         public async Task LoadData(string _url)
         {
+
+            url = _url;
 
             #region Get Data
             HtmlWeb web = new HtmlWeb();
@@ -207,7 +209,7 @@ namespace Mago
             #region Save Data
             _name = name;
             _status = status;
-            _image = MangaView.GetImageArray(imageSource).ToBitmapImage();
+            _image = imageSource.ToFreezedBitmapImage();
             _description = description;
 
             _authorList = authors;
@@ -238,6 +240,8 @@ namespace Mago
 
         public void ApplyData()
         {
+            MangaView.Url = url; 
+
             MangaView.Name = _name;
             MangaView.MangaStatus = _status;
             MangaView.ImageSource = _image;

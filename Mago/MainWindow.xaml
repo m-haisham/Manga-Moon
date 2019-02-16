@@ -218,8 +218,7 @@
                     <materialDesign:Transitioner
                         AutoApplyTransitionOrigins="True"
                         Panel.ZIndex="-1"
-                        SelectedIndex="9">
-                        <!--SelectedIndex="{Binding MenuViewModel.TransitionIndex}"-->
+                        SelectedIndex="{Binding MenuViewModel.TransitionIndex}">
                         <materialDesign:TransitionerSlide>
                             <materialDesign:TransitionerSlide.ForwardWipe>
                                 <materialDesign:SlideOutWipe/>
@@ -325,7 +324,7 @@
                                                             Storyboard.TargetName="TopDrawerButton"
                                                             Storyboard.TargetProperty="Opacity"
                                                             From="1" To="0.2"
-                                                            AccelerationRatio="0.9"/>
+                                                            AccelerationRatio="1"/>
                                                     </Storyboard>
                                                 </BeginStoryboard>
                                             </EventTrigger>
@@ -336,7 +335,7 @@
                                                             Storyboard.TargetName="TopDrawerButton"
                                                             Storyboard.TargetProperty="Opacity"
                                                             From="0.2" To="1"
-                                                            AccelerationRatio="0.9"/>
+                                                            AccelerationRatio="1"/>
                                                     </Storyboard>
                                                 </BeginStoryboard>
                                             </EventTrigger>
@@ -345,9 +344,10 @@
                                     <DockPanel>
                                         <ScrollViewer
                                             HorizontalAlignment="Stretch"
-                                            VerticalScrollBarVisibility="Auto">
+                                            VerticalScrollBarVisibility="Auto"
+                                            local:ScrollViewerBehavior.AutoScrollToTop="{Binding ReaderViewModel.ScrollTop, Mode=TwoWay}">
                                             <StackPanel>
-                                                <0
+                                                <Button
                                                     Content="PREVIOUS CHAPTER"
                                                     FontSize="20"
                                                     Padding="2"

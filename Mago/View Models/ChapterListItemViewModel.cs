@@ -40,6 +40,7 @@ namespace Mago
 
         private void Read()
         {
+            Task.Run(() => Parent.OpenInReader(Index));
             IsRead = true;
         }
 

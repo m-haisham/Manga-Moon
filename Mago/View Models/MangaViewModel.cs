@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
@@ -9,6 +10,8 @@ namespace Mago
 {
     public class MangaViewModel : BaseViewModel
     {
+
+        public string Url;
 
         private ObservableCollection<ChapterListItemViewModel> _chapterList;
         private ObservableCollection<GenreItemViewModel> _genreList;
@@ -28,8 +31,11 @@ namespace Mago
 
         public ICommand DownloadSelected { get; set; }
 
-        public MangaViewModel()
+        private MainViewModel MainView;
+
+        public MangaViewModel(MainViewModel mainView)
         {
+            MainView = mainView;
             DownloadSelected = new RelayCommand(DownloadMultiple);
             Setup();
         }
@@ -74,6 +80,15 @@ namespace Mago
             };
 
             _authorList = new ObservableCollection<string> { "Sakamoto 666", "Mizukiyoshi Juro" };
+        }
+
+        public async Task OpenInReader(int index)
+        {
+            MainView.ReaderViewModel.SetURL(Url);
+
+            await MainView.ReaderViewModel.Setup(_chapterList.Count - index - 1);
+
+            MainView.MenuViewModel.TransitionIndex = MainView.MenuViewModel.page.MangaReader;
         }
 
         #region Helper Methods

@@ -20,7 +20,7 @@ namespace Mago
             _downloadsPanelViewModel = new DownloadsPanelViewModel();
             _menuViewModel = new MenuViewModel();
             _findByViewModel = new FindByViewModel(this, HtmlPageLoader);
-            _mangaViewModel = new MangaViewModel();
+            _mangaViewModel = new MangaViewModel(this);
             _readerViewModel = new ReaderViewModel();
             HtmlPageLoader = new HtmlPageLoader(_mangaViewModel);
             

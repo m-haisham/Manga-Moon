@@ -24,6 +24,7 @@ namespace Mago
         private bool _isTopBarOpen;
         private bool _nextChapterExists;
         private bool _lastChapterExists;
+        private bool _ScrollTop;
 
         private int _selectedZoomIndex;
         private int _selectedMarginIndex;
@@ -49,13 +50,10 @@ namespace Mago
             SelectedZoomIndex = 3;
             LoadNext = new RelayCommand(AdvanceSelected);
             LoadPrevious = new RelayCommand(BackSelected);
-            Task.Run(Setup);
         }
 
-        private async Task Setup()
+        public async Task Setup(int index)
         {
-            URL = "https://mangakakalot.com/manga/pn918005";
-
             //Split the tasks
             HtmlWeb web = new HtmlWeb();
             HtmlDocument doc = web.Load(URL);
@@ -87,13 +85,10 @@ namespace Mago
 
                 //Set Buttons
                 CalculateChapterInfo();
+                
+                //Start download of chapter by setting chapter index
+                SelectedChapterIndex = index;
             });
-
-            //get new token
-            CancellationToken newToken = tokenPool.getToken();
-
-            //load selected chapter
-            currentDownloadTask = Task.Run(() => LoadChapterAsync(_selectedChapterIndex, newToken), newToken);
         }
 
         public async Task LoadChapterAsync(int index, CancellationToken token)
@@ -101,6 +96,7 @@ namespace Mago
             //wait till previous task is cancelled
             while (lastDownloadTask != null && lastDownloadTask.Status == TaskStatus.WaitingForActivation && !lastDownloadTask.IsCanceled)
                 Debug.WriteLine("Waiting for last task to cancel");
+
                 //wait for 25ms
                 await Task.Delay(25);
             
@@ -178,6 +174,11 @@ namespace Mago
 
             //add to Collection
             _pages.Add(pgm);
+        }
+
+        public void SetURL(string url)
+        {
+            URL = url;
         }
 
         public void AdvanceSelected()
@@ -316,6 +317,10 @@ namespace Mago
                 //get new token
                 CancellationToken newToken = tokenPool.getToken();
 
+                //Scroll to top
+                ScrollTop = true;
+                _ScrollTop = false;
+
                 //clear current pages
                 _pages.Clear();
 
@@ -323,6 +328,7 @@ namespace Mago
                 currentDownloadTask = Task.Run(() => LoadChapterAsync(_selectedChapterIndex, newToken), newToken);
             }
         }
+
         public bool IsTopBarOpen
         {
             get { return _isTopBarOpen; }
@@ -348,6 +354,14 @@ namespace Mago
             {
                 if (_lastChapterExists == value) return;
                 _lastChapterExists = value;
+            }
+        }
+        public bool ScrollTop
+        {
+            get { return _ScrollTop; }
+            set
+            {
+                _ScrollTop = value;
             }
         }
     }

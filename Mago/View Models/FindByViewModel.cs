@@ -24,7 +24,7 @@ namespace Mago
         private bool _NameIsIndeternimate;
         private bool _NameButtonEnabled = true;
 
-        private MainViewModel main;
+        private MainViewModel mainView;
         private HtmlPageLoader PageLoader;
 
         public ICommand FindByName { get; set; }
@@ -37,7 +37,7 @@ namespace Mago
             FindByName = new RelayCommand(() => Task.Run(SearchWithName));
             FindByURL = new RelayCommand(() => Task.Run(SearchWithURL));
 
-            main = mainViewModel;
+            mainView = mainViewModel;
         }
 
         async Task SearchWithName()
@@ -49,8 +49,8 @@ namespace Mago
             bool isWebsiteValid = await RemoteFileExists(url);
             if (!isWebsiteValid) { NameIsIndeterminate = false; WarningIconVisibility = Visibility.Visible; return; }
             WarningIconVisibility = Visibility.Hidden;
-            NameIsIndeterminate = false;
-            OpenManga(url);
+            string n_url = url;
+            //OpenManga(n_url);
         }
 
         async Task SearchWithURL()
@@ -61,13 +61,24 @@ namespace Mago
             bool isWebsiteValid = await RemoteFileExists(MangaURL);
             if (!isWebsiteValid) { URLIsIndeterminate = false; WarningIconVisibility = Visibility.Visible; return; }
             WarningIconVisibility = Visibility.Hidden;
-            URLIsIndeterminate = false;
-            OpenManga(MangaURL);
+            string n_url = MangaURL;
+            OpenManga(n_url);
         }
 
-        private void OpenManga(string url)
+        private async Task OpenManga(string url)
         {
-            Debug.WriteLine(url);
+            //wait will page is loaded
+            await mainView.HtmlPageLoader.LoadData(url);
+
+            //apply the data
+            mainView.HtmlPageLoader.ApplyData();
+
+            //clear button loading
+            NameIsIndeterminate = false;
+            URLIsIndeterminate = false;
+
+            //Set transitional index to Open Manga viewer
+            mainView.MenuViewModel.TransitionIndex = mainView.MenuViewModel.page.MangaInfoView;
         }
 
         async Task<bool> RemoteFileExists(string url)
