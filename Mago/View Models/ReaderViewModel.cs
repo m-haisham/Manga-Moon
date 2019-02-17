@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using MaterialDesignThemes.Wpf;
+using System.IO;
 
 namespace Mago
 {
@@ -103,40 +104,75 @@ namespace Mago
             //get current selected chapters url
             string currentUrl = _chapters[index].url;
 
-            //get all links of pages
-            List<string> pagePaths = new List<string>();
+            //get page paths
+            List<string> pagePaths = await GetPagePaths(currentUrl);
 
-            HtmlWeb web = new HtmlWeb();
-            HtmlDocument doc = web.Load(currentUrl);
-
-            //get division with id "vungdoc"
-            HtmlNode idNode = doc.GetElementbyId("vungdoc");
-
-            //get all img nodes
-            IEnumerable<HtmlNode> RawPageList = idNode.Descendants("img");
-            for (int i = 0; i < RawPageList.Count(); i++)
-            {
-                HtmlNode pageNode = RawPageList.ElementAt(i);
-
-                //get value of attribute source
-                string url = pageNode.Attributes["src"].Value;
-
-                //add value of type url to page list
-                pagePaths.Add(url);
-            }
-
-            //Create bitmap images for the links
+            //Itereate through pages
             for (int i = 0; i < pagePaths.Count; i++)
             {
-                //using written helper function
-                BitmapImage imageSource = pagePaths[i].ToFreezedBitmapImage();
+                BitmapImage imageSource;
 
+                //if chapter already downloaded
+                if(_chapters[SelectedChapterIndex].imageTempPaths.Count >= i + 1 && _chapters[SelectedChapterIndex].imageTempPaths[i] != null)
+                {
+                    //load image from byte array on file
+                    imageSource = LoadBitmapFromArrayFile(_chapters[SelectedChapterIndex].imageTempPaths[i]);
+                }
+                else
+                {
+                    //Download the data to byte array
+                    byte[] byteArray = DataConversionHelper.DownloadToArray(pagePaths[i]);
+
+                    //save byte array to temporary file
+                    string tempPath = SaveByteArrayToTempFile(byteArray);
+
+                    //record temporary path
+                    _chapters[SelectedChapterIndex].imageTempPaths.Add(tempPath);
+                    
+                    //convert array to Bitmap
+                    imageSource = byteArray.ToFreezedBitmapImage();
+                }
+                
                 //check for cancellation before applying image
                 token.ThrowIfCancellationRequested();
                 
                 //Call main thread to add to collection
                 Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(imageSource); });
             }
+
+            #region Download next chapter to temporary path
+
+            //if next chapter doesnt exist exit method
+            if (!NextChapterExists) return;
+
+            //Next chapters url
+            string NextUrl = _chapters[index + 1].url;
+
+            //get page paths
+            pagePaths = await GetPagePaths(NextUrl);
+
+            //Itereate through pages
+            for (int i = 0; i < pagePaths.Count; i++)
+            {
+                //check for cancellation before downloading image
+                token.ThrowIfCancellationRequested();
+                
+                //if page of chapter havent been downloaded
+                if (!(_chapters[SelectedChapterIndex + 1].imageTempPaths.Count >= i + 1 && _chapters[SelectedChapterIndex + 1].imageTempPaths[i] != null))
+                {
+                    //Download the data to byte array
+                    byte[] byteArray = DataConversionHelper.DownloadToArray(pagePaths[i]);
+
+                    //save byte array to temporary file
+                    string tempPath = SaveByteArrayToTempFile(byteArray);
+
+                    //record temporary path
+                    _chapters[SelectedChapterIndex + 1].imageTempPaths.Add(tempPath);
+                }
+                
+            }
+
+            #endregion
         }
 
         public async Task SetChapterData(ObservableCollection<ChapterInfo> infoList)
@@ -162,6 +198,34 @@ namespace Mago
             
         }
 
+        public async Task<List<string>> GetPagePaths(string ChapterPath)
+        {
+            //get all links of pages
+            List<string> pagePaths = new List<string>();
+
+            HtmlWeb web = new HtmlWeb();
+            HtmlDocument doc = web.Load(ChapterPath);
+
+            //get division with id "vungdoc"
+            HtmlNode idNode = doc.GetElementbyId("vungdoc");
+
+            //get all img nodes
+            IEnumerable<HtmlNode> RawPageList = idNode.Descendants("img");
+            for (int i = 0; i < RawPageList.Count(); i++)
+            {
+                HtmlNode pageNode = RawPageList.ElementAt(i);
+
+                //get value of attribute source
+                string url = pageNode.Attributes["src"].Value;
+
+                //add value of type url to page list
+                pagePaths.Add(url);
+            }
+
+            //return paths
+            return pagePaths;
+        }
+
         public void AddToReaderAsync(BitmapImage source)
         {
             //Create new Page view model
@@ -176,6 +240,53 @@ namespace Mago
             _pages.Add(pgm);
         }
 
+        public string SaveByteArrayToTempFile(byte[] array)
+        {
+            //get temporary file path
+            string tempPath = Path.GetTempFileName();
+
+            //create temporary file
+            FileStream stream = new FileStream(tempPath, FileMode.Create);
+
+            //write byteArray to file to file
+            stream.Write(array, 0, array.Count());
+
+            //close filestream
+            stream.Close();
+
+            //return file path
+            return tempPath;
+        }
+
+        public BitmapImage LoadBitmapFromArrayFile(string path)
+        {
+            //read bytes to array
+            byte[] array = File.ReadAllBytes(path);
+
+            //convert array to Bitmap
+            BitmapImage image = array.ToFreezedBitmapImage();
+
+            //return Bitmap
+            return image;
+        }
+        
+        public void ClearTemporary()
+        {
+            //for all chapters
+            for (int i = 0; i < _chapters?.Count; i++)
+            {
+                //for all pages in chapter
+                for (int j = 0; j < _chapters[i].imageTempPaths?.Count; j++)
+                {
+                    //delete temporary file
+                    File.Delete(_chapters[i].imageTempPaths[j]);
+                }
+            }
+
+            Debug.WriteLine("All temporary files deleted");
+
+        }
+        
         public void SetURL(string url)
         {
             URL = url;
@@ -196,54 +307,7 @@ namespace Mago
             NextChapterExists = SelectedChapterIndex < _chapters.Count - 1;
             LastChapterExists = SelectedChapterIndex > 0;
         }
-
-        public async Task SetChapters()
-        {
-             _chapters = await URL.ToRawChapters();
-            _chapterNames = new ObservableCollection<string>();
-            for (int i = 0; i < _chapters.Count; i++)
-            {
-                var list = _chapters[i].url.Split('/');
-                _chapterNames.Add(list[list.Length - 1]);
-            }
-        }
-
-        public async Task LoadSelected()
-        {
-            if(_chapters[SelectedChapterIndex].images.Count == 0)
-            {
-                await _chapters[SelectedChapterIndex].DownloadPages();
-            }
-
-            ObservableCollection<PageViewModel> _pages = new ObservableCollection<PageViewModel>();
-            
-            for (int i = 0; i < _chapters[SelectedChapterIndex].images.Count; i++)
-            {
-                _pages.Add(new PageViewModel(_chapters[SelectedChapterIndex].images[i])
-                {
-                    Zoom = _zoom[SelectedZoomIndex],
-                    Margin = Margin[SelectedMarginIndex]
-                });
-                
-            }
-
-            for (int i = 0; i < _chapters.Count; i++)
-            {
-                if(i > (SelectedChapterIndex + 1) && i < (SelectedChapterIndex - 1))
-                    _chapters[i].images = new List<System.Windows.Media.Imaging.BitmapImage>();
-            }
-
-            if (_chapters[SelectedChapterIndex + 1].images.Count == 0)
-            {
-                await _chapters[SelectedChapterIndex + 1].DownloadPages();
-            }
-
-            if (_chapters[SelectedChapterIndex - 1].images.Count == 0)
-            {
-                await _chapters[SelectedChapterIndex - 1].DownloadPages();
-            }
-        }
-
+        
         public void ApplyZoom()
         {
             foreach (var page in Pages)

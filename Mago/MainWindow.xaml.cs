@@ -28,5 +28,25 @@ namespace Mago
             InitializeComponent();
             DataContext = new MainViewModel();
         }
+
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            int incrementMultiplier = 2;
+            ScrollViewer scrollViewer = sender as ScrollViewer;
+            var offset = scrollViewer.VerticalOffset - (e.Delta * incrementMultiplier);
+            if (offset < 0)
+            {
+                scrollViewer.ScrollToVerticalOffset(0);
+            }
+            else if (offset > scrollViewer.ExtentHeight)
+            {
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.ExtentHeight);
+            }
+            else
+            {
+                scrollViewer.ScrollToVerticalOffset(offset);
+            }
+            e.Handled = true;
+        }
     }
 }

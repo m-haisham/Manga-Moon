@@ -20,6 +20,8 @@ namespace Mago
         private readonly Uri lightTheme = new Uri("pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml");
         public readonly Page page = new Page();
 
+        MainViewModel Parent;
+
         #region Commands
 
         public ICommand MinimizeCommand { get; set; }
@@ -36,8 +38,10 @@ namespace Mago
 
         #endregion
 
-        public MenuViewModel()
+        public MenuViewModel(MainViewModel parent)
         {
+            Parent = parent;
+
             _darkThemeEnabled = Application.Current.Resources.MergedDictionaries[0].Source == darkTheme;
 
             MinimizeCommand = new RelayCommand(Minimize);
@@ -115,6 +119,7 @@ namespace Mago
 
         private void Shutdown()
         {
+            Parent.ReaderViewModel.ClearTemporary();
             Application.Current.Shutdown();
         }
 

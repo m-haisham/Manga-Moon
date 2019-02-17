@@ -12,7 +12,7 @@ namespace Mago
 {
     public static class DataConversionHelper
     {
-        public static BitmapImage ToBitmapImage(this byte[] array)
+        public static BitmapImage ToFreezedBitmapImage(this byte[] array)
         {
             using (MemoryStream ms = new MemoryStream(array))
             {
@@ -21,6 +21,7 @@ namespace Mago
                 image.CacheOption = BitmapCacheOption.OnLoad;
                 image.StreamSource = ms;
                 image.EndInit();
+                image.Freeze();
                 return image;
             }
         }
@@ -40,6 +41,13 @@ namespace Mago
                 return image;
             }
         }
+
+        public static byte[] DownloadToArray(string url)
+        {
+            WebClient web = new WebClient();
+            return web.DownloadData(url);
+        }
+
         public static BitmapImage ToFreezedBitmapImage(this string url)
         {
             var image = url.ToBitmapImage();

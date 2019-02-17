@@ -345,7 +345,8 @@
                                         <ScrollViewer
                                             HorizontalAlignment="Stretch"
                                             VerticalScrollBarVisibility="Auto"
-                                            local:ScrollViewerBehavior.AutoScrollToTop="{Binding ReaderViewModel.ScrollTop, Mode=TwoWay}">
+                                            local:ScrollViewerBehavior.AutoScrollToTop="{Binding ReaderViewModel.ScrollTop, Mode=TwoWay}"
+                                            PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
                                             <StackPanel>
                                                 <Button
                                                     Content="PREVIOUS CHAPTER"

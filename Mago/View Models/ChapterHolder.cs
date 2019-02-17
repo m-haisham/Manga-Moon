@@ -13,7 +13,7 @@ namespace Mago
 
         public string url;
         public List<string> imagepaths;
-        public List<BitmapImage> images;
+        public List<string> imageTempPaths;
 
         public bool pathsLoaded = false;
         public bool imagesLoaded = false;
@@ -21,21 +21,7 @@ namespace Mago
         public ChapterHolder()
         {
             imagepaths = new List<string>();
-            images = new List<BitmapImage>();
-        }
-
-        public async Task<bool> DownloadPages()
-        {
-            WebClient client = new WebClient();
-            if (imagepaths .Count == 0) SetImagePaths();
-
-            images = new List<BitmapImage>();
-            foreach (var path in imagepaths)
-            {
-                images.Add(path.ToBitmapImage());
-            }
-            
-            return true;
+            imageTempPaths = new List<string>();
         }
 
         private void SetImagePaths()
