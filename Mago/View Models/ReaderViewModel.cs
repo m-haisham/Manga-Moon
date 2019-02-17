@@ -103,40 +103,38 @@ namespace Mago
             //get current selected chapters url
             string currentUrl = _chapters[index].url;
 
-            //get all links of pages
-            List<string> pagePaths = new List<string>();
+            //get page paths
+            List<string> pagePaths = await GetPagePaths(currentUrl);
 
-            HtmlWeb web = new HtmlWeb();
-            HtmlDocument doc = web.Load(currentUrl);
-
-            //get division with id "vungdoc"
-            HtmlNode idNode = doc.GetElementbyId("vungdoc");
-
-            //get all img nodes
-            IEnumerable<HtmlNode> RawPageList = idNode.Descendants("img");
-            for (int i = 0; i < RawPageList.Count(); i++)
-            {
-                HtmlNode pageNode = RawPageList.ElementAt(i);
-
-                //get value of attribute source
-                string url = pageNode.Attributes["src"].Value;
-
-                //add value of type url to page list
-                pagePaths.Add(url);
-            }
-
-            //Create bitmap images for the links
+            //Itereate through pages
             for (int i = 0; i < pagePaths.Count; i++)
             {
-                //using written helper function
-                BitmapImage imageSource = pagePaths[i].ToFreezedBitmapImage();
+                BitmapImage imageSource;
 
+                //if chapter already downloaded
+                if(_chapters[SelectedChapterIndex].images.Count >= i + 1 && _chapters[SelectedChapterIndex].images != null)
+                {
+                    //load image from data
+                    imageSource = _chapters[SelectedChapterIndex].images[i];
+                }
+                else
+                {
+                    //download image using written helper function
+                    imageSource = pagePaths[i].ToFreezedBitmapImage();
+                }
+                
                 //check for cancellation before applying image
                 token.ThrowIfCancellationRequested();
                 
                 //Call main thread to add to collection
                 Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(imageSource); });
             }
+
+            #region Download next chapter to data
+
+
+
+            #endregion
         }
 
         public async Task SetChapterData(ObservableCollection<ChapterInfo> infoList)
@@ -160,6 +158,34 @@ namespace Mago
                 //await Task.Delay((int)(0.001 * 1000));
             }
             
+        }
+
+        public async Task<List<string>> GetPagePaths(string ChapterPath)
+        {
+            //get all links of pages
+            List<string> pagePaths = new List<string>();
+
+            HtmlWeb web = new HtmlWeb();
+            HtmlDocument doc = web.Load(ChapterPath);
+
+            //get division with id "vungdoc"
+            HtmlNode idNode = doc.GetElementbyId("vungdoc");
+
+            //get all img nodes
+            IEnumerable<HtmlNode> RawPageList = idNode.Descendants("img");
+            for (int i = 0; i < RawPageList.Count(); i++)
+            {
+                HtmlNode pageNode = RawPageList.ElementAt(i);
+
+                //get value of attribute source
+                string url = pageNode.Attributes["src"].Value;
+
+                //add value of type url to page list
+                pagePaths.Add(url);
+            }
+
+            //return paths
+            return pagePaths;
         }
 
         public void AddToReaderAsync(BitmapImage source)
