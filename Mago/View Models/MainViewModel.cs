@@ -18,7 +18,7 @@ namespace Mago
         public MainViewModel()
         {
             _downloadsPanelViewModel = new DownloadsPanelViewModel();
-            _menuViewModel = new MenuViewModel();
+            _menuViewModel = new MenuViewModel(this);
             _findByViewModel = new FindByViewModel(this, HtmlPageLoader);
             _mangaViewModel = new MangaViewModel(this);
             _readerViewModel = new ReaderViewModel();

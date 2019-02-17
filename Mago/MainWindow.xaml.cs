@@ -31,8 +31,9 @@ namespace Mago
 
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
+            int incrementMultiplier = 2;
             ScrollViewer scrollViewer = sender as ScrollViewer;
-            var offset = e.Delta * 2;
+            var offset = scrollViewer.VerticalOffset - (e.Delta * incrementMultiplier);
             if (offset < 0)
             {
                 scrollViewer.ScrollToVerticalOffset(0);

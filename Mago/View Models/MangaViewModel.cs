@@ -150,12 +150,12 @@ namespace Mago
         public void SetImageSource()
         {
             if (_imageArray == null) return;
-            ImageSource = _imageArray.ToBitmapImage();
+            ImageSource = _imageArray.ToFreezedBitmapImage();
         }
 
         public BitmapImage GetImageSource(byte[] array)
         {
-            return array.ToBitmapImage();
+            return array.ToFreezedBitmapImage();
         }
 
         #endregion
