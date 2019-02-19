@@ -81,6 +81,7 @@
     <Compile Include="Classes\DataConversionHelper.cs" />
     <Compile Include="Classes\Enums\ChapterInfo.cs" />
     <Compile Include="Classes\Enums\DownloadState.cs" />
+    <Compile Include="Classes\Enums\NotificationMode.cs" />
     <Compile Include="Classes\Enums\Page.cs" />
     <Compile Include="Classes\RelayParameterizedCommand.cs" />
     <Compile Include="Classes\RelayCommand.cs" />
@@ -109,6 +110,8 @@
     <Compile Include="View Models\DownloadProgressViewModel.cs" />
     <Compile Include="View Models\MangaViewModel.cs" />
     <Compile Include="View Models\MenuViewModel.cs" />
+    <Compile Include="View Models\NotificationItemViewModel.cs" />
+    <Compile Include="View Models\NotificationsViewModel.cs" />
     <Compile Include="View Models\PageViewModel.cs" />
     <Compile Include="View Models\ReaderViewModel.cs" />
     <Page Include="MainWindow.xaml">

@@ -184,7 +184,7 @@ namespace Mago
                     DownloadState = DownloadState.Queued
                 });
 
-            if(_DownloadsPanel.Count == 1 && _playPackIcon != PackIconKind.Pause)
+            if(_DownloadsPanel.Count == 1 && _playPackIcon == PackIconKind.Pause)
             {
                 //StartDownload
             }

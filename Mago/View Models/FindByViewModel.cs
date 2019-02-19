@@ -50,7 +50,7 @@ namespace Mago
             if (!isWebsiteValid) { NameIsIndeterminate = false; WarningIconVisibility = Visibility.Visible; return; }
             WarningIconVisibility = Visibility.Hidden;
             string n_url = url;
-            //OpenManga(n_url);
+            OpenManga(n_url);
         }
 
         async Task SearchWithURL()

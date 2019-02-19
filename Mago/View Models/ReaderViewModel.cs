@@ -22,6 +22,8 @@ namespace Mago
         private ObservableCollection<int> _zoom;
         private ObservableCollection<int> _margin;
 
+        private string _mangaName;
+
         private bool _isTopBarOpen;
         private bool _nextChapterExists;
         private bool _lastChapterExists;
@@ -29,20 +31,20 @@ namespace Mago
 
         private int _selectedZoomIndex;
         private int _selectedMarginIndex;
-        private int _selectedChapterIndex;
+        private int? _selectedChapterIndex = null;
 
         public ICommand LoadPrevious { get; set; }
         public ICommand LoadNext { get; set; }
 
         private string URL;
-
+        private MainViewModel MainViewModel;
         private List<ChapterHolder> _chapters;
 
         TokenPool tokenPool = new TokenPool(5);
         Task lastDownloadTask;
         Task currentDownloadTask;
-
-        public ReaderViewModel()
+        
+        public ReaderViewModel(MainViewModel MainView)
         {
             _pages = new ObservableCollection<PageViewModel>();
             _zoom = new ObservableCollection<int> { 25, 50, 75, 100, 125, 150, 175, 200, 250, 300 };
@@ -51,6 +53,7 @@ namespace Mago
             SelectedZoomIndex = 3;
             LoadNext = new RelayCommand(AdvanceSelected);
             LoadPrevious = new RelayCommand(BackSelected);
+            MainViewModel = MainView;
         }
 
         public async Task Setup(int index)
@@ -96,11 +99,13 @@ namespace Mago
         {
             //wait till previous task is cancelled
             while (lastDownloadTask != null && lastDownloadTask.Status == TaskStatus.WaitingForActivation && !lastDownloadTask.IsCanceled)
+            {
                 Debug.WriteLine("Waiting for last task to cancel");
 
                 //wait for 25ms
                 await Task.Delay(25);
-            
+            }
+
             //get current selected chapters url
             string currentUrl = _chapters[index].url;
 
@@ -113,10 +118,10 @@ namespace Mago
                 BitmapImage imageSource;
 
                 //if chapter already downloaded
-                if(_chapters[SelectedChapterIndex].imageTempPaths.Count >= i + 1 && _chapters[SelectedChapterIndex].imageTempPaths[i] != null)
+                if(_chapters[(int)SelectedChapterIndex].imageTempPaths.Count >= i + 1 && _chapters[(int)SelectedChapterIndex].imageTempPaths[i] != null)
                 {
                     //load image from byte array on file
-                    imageSource = LoadBitmapFromArrayFile(_chapters[SelectedChapterIndex].imageTempPaths[i]);
+                    imageSource = LoadBitmapFromArrayFile(_chapters[(int)SelectedChapterIndex].imageTempPaths[i]);
                 }
                 else
                 {
@@ -127,7 +132,7 @@ namespace Mago
                     string tempPath = SaveByteArrayToTempFile(byteArray);
 
                     //record temporary path
-                    _chapters[SelectedChapterIndex].imageTempPaths.Add(tempPath);
+                    _chapters[(int)SelectedChapterIndex].imageTempPaths.Add(tempPath);
                     
                     //convert array to Bitmap
                     imageSource = byteArray.ToFreezedBitmapImage();
@@ -139,6 +144,9 @@ namespace Mago
                 //Call main thread to add to collection
                 Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(imageSource); });
             }
+
+            //Rise notification
+            Application.Current.Dispatcher.Invoke(() => MainViewModel.NotificationsViewModel.AddNotification("Current chapter fully loaded", NotificationMode.Success));
 
             #region Download next chapter to temporary path
 
@@ -158,7 +166,7 @@ namespace Mago
                 token.ThrowIfCancellationRequested();
                 
                 //if page of chapter havent been downloaded
-                if (!(_chapters[SelectedChapterIndex + 1].imageTempPaths.Count >= i + 1 && _chapters[SelectedChapterIndex + 1].imageTempPaths[i] != null))
+                if (!(_chapters[(int)SelectedChapterIndex + 1].imageTempPaths.Count >= i + 1 && _chapters[(int)SelectedChapterIndex + 1].imageTempPaths[i] != null))
                 {
                     //Download the data to byte array
                     byte[] byteArray = DataConversionHelper.DownloadToArray(pagePaths[i]);
@@ -167,7 +175,7 @@ namespace Mago
                     string tempPath = SaveByteArrayToTempFile(byteArray);
 
                     //record temporary path
-                    _chapters[SelectedChapterIndex + 1].imageTempPaths.Add(tempPath);
+                    _chapters[(int)SelectedChapterIndex + 1].imageTempPaths.Add(tempPath);
                 }
                 
             }
@@ -344,6 +352,16 @@ namespace Mago
         public ObservableCollection<int> Zoom => _zoom;
         public ObservableCollection<int> Margin => _margin;
 
+        public string MangaName
+        {
+            get { return _mangaName; }
+            set
+            {
+                if (_mangaName == value) return;
+                _mangaName = value;
+            }
+        }
+
         public int SelectedZoomIndex
         {
             get { return _selectedZoomIndex; }
@@ -364,13 +382,16 @@ namespace Mago
                 ApplyMargin();
             }
         }
-        public int SelectedChapterIndex
+        public int? SelectedChapterIndex
         {
             get => _selectedChapterIndex;
             set
             {
                 if (_selectedChapterIndex == value) return;
                 _selectedChapterIndex = value;
+
+                //if value if null, exit
+                if (_selectedChapterIndex == null) return;
 
                 //re set the buttons
                 CalculateChapterInfo();
@@ -389,7 +410,7 @@ namespace Mago
                 _pages.Clear();
 
                 //assign new download task
-                currentDownloadTask = Task.Run(() => LoadChapterAsync(_selectedChapterIndex, newToken), newToken);
+                currentDownloadTask = Task.Run(() => LoadChapterAsync((int)_selectedChapterIndex, newToken), newToken);
             }
         }
 

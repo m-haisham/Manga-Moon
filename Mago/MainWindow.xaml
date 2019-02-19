@@ -11,7 +11,7 @@
         TextElement.FontSize="14"
         FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto" 
         mc:Ignorable="d"
-        Title="MainWindow" Height="768" Width="1366" WindowStartupLocation="CenterScreen" WindowStyle="None">
+        Title="MainWindow"   Height="768" Width="1366" WindowStartupLocation="CenterScreen" WindowStyle="None">
 
     <materialDesign:DialogHost Identifier="RootDialog" SnackbarMessageQueue="{Binding ElementName=MainSnackbar, Path=MessageQueue}">
         <materialDesign:DrawerHost IsLeftDrawerOpen="{Binding MenuViewModel.IsMenuOpen}">
@@ -300,7 +300,7 @@
                                 <materialDesign:SlideOutWipe/>
                             </materialDesign:TransitionerSlide.ForwardWipe>
                             <!--chapter View-->
-                            <materialDesign:DrawerHost IsTopDrawerOpen="{Binding ReaderViewModel.IsTopBarOpen, Mode=TwoWay}" Margin="0,0,0,0">
+                            <materialDesign:DrawerHost IsTopDrawerOpen="{Binding ReaderViewModel.IsTopBarOpen, Mode=TwoWay}">
                                 <Grid>
                                     <ToggleButton
                                         Name="TopDrawerButton"
@@ -308,7 +308,7 @@
                                         IsChecked="{Binding ReaderViewModel.IsTopBarOpen, Mode=TwoWay}"
                                         HorizontalAlignment="Right"
                                         VerticalAlignment="Top"
-                                        Margin="10"
+                                        Margin="10 10 15 10"
                                         Padding="2"
                                         Opacity="0.2"
                                         Panel.ZIndex="5">
@@ -346,7 +346,8 @@
                                             HorizontalAlignment="Stretch"
                                             VerticalScrollBarVisibility="Auto"
                                             local:ScrollViewerBehavior.AutoScrollToTop="{Binding ReaderViewModel.ScrollTop, Mode=TwoWay}"
-                                            PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+                                            PreviewMouseWheel="ScrollViewer_PreviewMouseWheel"
+                                            CanContentScroll="False">
                                             <StackPanel>
                                                 <Button
                                                     Content="PREVIOUS CHAPTER"
@@ -386,9 +387,14 @@
                                 <materialDesign:DrawerHost.TopDrawerContent>
                                     <DockPanel
                                         Margin="5"
-                                        Height="40"
+                                        Height="75"
                                         Background="{DynamicResource MaterialDesignPaper}">
                                         <DockPanel>
+                                            <TextBlock
+                                                Text="{Binding ReaderViewModel.MangaName}"
+                                                DockPanel.Dock="Top"
+                                                Margin="20,5,0,0"
+                                                Style="{StaticResource MaterialDesignTitleTextBlock}"/>
                                             <StackPanel
                                                 Orientation="Horizontal"
                                                 DockPanel.Dock="Right"
@@ -468,6 +474,49 @@
                         </materialDesign:TransitioningContent>
                     </materialDesign:TransitionerSlide>
                 </materialDesign:Transitioner>
+                <ScrollViewer
+                    MaxHeight="600"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    VerticalScrollBarVisibility="Hidden">
+                    <ItemsControl
+                        ItemsSource="{Binding NotificationsViewModel.Notifications}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel
+                                    Margin="5"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate
+                                DataType="{x:Type local:NotificationItemViewModel}">
+                                <materialDesign:Card
+                                    Background="{DynamicResource PrimaryHueLightBrush}"
+                                    DockPanel.Dock="Bottom"
+                                    Margin="5 5 15 5">
+                                    <materialDesign:ColorZone
+                                        Mode="{Binding Mode}">
+                                        <Button
+                                            Style="{StaticResource MaterialDesignFlatButton}"
+                                            HorizontalContentAlignment="Stretch"
+                                            VerticalContentAlignment="Stretch"
+                                            Foreground="{DynamicResource MaterialDesignBody}"
+                                            Command="{Binding Remove}">
+                                            <TextBlock
+                                                Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                                Text="{Binding Message}"
+                                                Margin="5"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Center"
+                                                MaxWidth="400"
+                                                TextWrapping="Wrap"/>
+                                        </Button>
+                                    </materialDesign:ColorZone>
+                                </materialDesign:Card>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
             </Grid>
         </materialDesign:DrawerHost>
     </materialDesign:DialogHost>

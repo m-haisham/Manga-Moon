@@ -84,6 +84,7 @@ namespace Mago
 
         public async Task OpenInReader(int index)
         {
+            MainView.ReaderViewModel.MangaName = Name;
             MainView.ReaderViewModel.SetURL(Url);
 
             await MainView.ReaderViewModel.Setup(_chapterList.Count - index - 1);

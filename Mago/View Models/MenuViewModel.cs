@@ -119,7 +119,7 @@ namespace Mago
 
         private void Shutdown()
         {
-            Parent.ReaderViewModel.ClearTemporary();
+            Parent.ReaderViewModel.ClearTemporary();    
             Application.Current.Shutdown();
         }
 
