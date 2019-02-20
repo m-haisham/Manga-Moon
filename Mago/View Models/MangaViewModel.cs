@@ -37,7 +37,6 @@ namespace Mago
         {
             MainView = mainView;
             DownloadSelected = new RelayCommand(DownloadMultiple);
-            Setup();
         }
 
         private void DownloadMultiple()
@@ -48,38 +47,18 @@ namespace Mago
                 if (ChapterList[i].IsSelected)
                     SelectedIndexList.Add(i);
             }
+            SelectedIndexList.Reverse();
+
             foreach (var index in SelectedIndexList)
             {
+                AddtoDownloads(ChapterList[index]);
                 ChapterList[index].IsNotDownloaded = false;
             }
         }
 
-        private void Setup()
+        public void AddtoDownloads(ChapterListItemViewModel chapter)
         {
-            ObservableCollection<ChapterListItemViewModel> listChapter = new ObservableCollection<ChapterListItemViewModel>();
-            for (int i = 0; i < 20; i++)
-            {
-                listChapter.Add(new ChapterListItemViewModel(this, i)
-                {
-                    Name = "chapter " + (i + 1).ToString(),
-                    IsRead = false,
-                    IsSelected = false,
-                    IsNotDownloaded = true
-                });
-            }
-
-            _chapterList = listChapter;
-
-            _genreList = new ObservableCollection<GenreItemViewModel>
-            {
-                new GenreItemViewModel { Text = "Action" },
-                new GenreItemViewModel { Text = "Adventure" },
-                new GenreItemViewModel { Text = "Drama" },
-                new GenreItemViewModel { Text = "Fantasy" },
-                new GenreItemViewModel { Text = "Tragedy" }
-            };
-
-            _authorList = new ObservableCollection<string> { "Sakamoto 666", "Mizukiyoshi Juro" };
+            MainView.DownloadsPanelViewModel.AddDownload(chapter.URL, Name);
         }
 
         public async Task OpenInReader(int index)

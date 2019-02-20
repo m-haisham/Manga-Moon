@@ -85,7 +85,9 @@
     <Compile Include="Classes\Enums\Page.cs" />
     <Compile Include="Classes\RelayParameterizedCommand.cs" />
     <Compile Include="Classes\RelayCommand.cs" />
+    <Compile Include="Classes\SaveSystem.cs" />
     <Compile Include="Classes\ScrollViewerBehavior.cs" />
+    <Compile Include="Classes\Serialized\ChSave.cs" />
     <Compile Include="Classes\TokenPool.cs" />
     <Compile Include="UserControls\DownloadsQueue.xaml.cs">
       <DependentUpon>DownloadsQueue.xaml</DependentUpon>

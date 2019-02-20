@@ -18,7 +18,7 @@ namespace Mago
 
         public MainViewModel()
         {
-            _downloadsPanelViewModel = new DownloadsPanelViewModel();
+            _downloadsPanelViewModel = new DownloadsPanelViewModel(this);
             _notificationsViewModel = new NotificationsViewModel();
             _menuViewModel = new MenuViewModel(this);
             _findByViewModel = new FindByViewModel(this, HtmlPageLoader);

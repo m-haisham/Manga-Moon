@@ -35,6 +35,7 @@ namespace Mago
 
         private void AddToDownloadQueue()
         {
+            Parent.AddtoDownloads(this);
             IsNotDownloaded = false;
         }
 
