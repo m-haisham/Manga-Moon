@@ -12,7 +12,7 @@
         HorizontalAlignment="Center"
         VerticalAlignment="Top">
         <ScrollViewer
-            VerticalScrollBarVisibility="Hidden">
+            VerticalScrollBarVisibility="Auto">
             <Border
                 Padding="5">
                 <DockPanel>

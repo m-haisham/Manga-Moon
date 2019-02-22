@@ -18,7 +18,6 @@ namespace Mago
         public NotificationsViewModel()
         {
             _notifications = new ObservableCollection<NotificationItemViewModel>();
-            Setup();
         }
 
         public void Setup()

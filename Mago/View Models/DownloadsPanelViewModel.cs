@@ -189,13 +189,13 @@ namespace Mago
             return obj;
         }
 
-        public void AddDownload(string url, string mangaName)
+        public void AddDownload(string url, string chapterName, string mangaName)
         {
             _DownloadsPanel.Add(
                 new DownloadProgressViewModel
                 {
                     Header = mangaName,
-                    Description = url.Split('/').Last(),
+                    Description = chapterName,
                     url = url,
                     Progress = 0,
                     DownloadState = DownloadState.Queued
@@ -267,13 +267,30 @@ namespace Mago
                 //Create new ch class
                 ChSave chSave = new ChSave(LoadPaths(item.tempPaths));
 
-                //Save file to respective
-                SaveSystem.Save(chSave, item.Description + ".ch");
+                //create path for download
+                string savePath = MainView.Settings.mangaPath + item.Header + "/" + item.Description + ".ch";
 
-                Application.Current.Dispatcher.Invoke(() => MainView.NotificationsViewModel.AddNotification(item.Description + " Download Complete.", NotificationMode.Success));
+                //Save file to path
+                SaveSystem.SaveBinary(chSave, savePath);
+
+                //dispose of save class
+                chSave = null;
+
+                //Set download status to complete
+                item.DownloadState = DownloadState.Completed;
+
+                //notify user according to settings
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (MainView.Settings.chapterDownloadNotifications)
+                        MainView.NotificationsViewModel.AddNotification(item.Description + " Download Complete.", NotificationMode.Success);
+                    if (MainView.Settings.autoDeleteCompletedDownloads)
+                        DownloadsPanel.Remove(item);
+                });
                 
-            }
 
+            }
+            
             isDownloading = false;
         }
 

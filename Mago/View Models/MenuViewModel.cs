@@ -42,7 +42,7 @@ namespace Mago
         {
             Parent = parent;
 
-            _darkThemeEnabled = Application.Current.Resources.MergedDictionaries[0].Source == darkTheme;
+            DarkThemeEnabled = Parent.Settings.darkModeEnabled;
 
             MinimizeCommand = new RelayCommand(Minimize);
             ShutdownCommand = new RelayCommand(Shutdown);
@@ -119,7 +119,8 @@ namespace Mago
 
         private void Shutdown()
         {
-            Parent.ReaderViewModel.ClearTemporary();    
+            SaveSystem.SaveSettings(Parent.Settings);
+            Parent.ReaderViewModel.ClearTemporary();
             Application.Current.Shutdown();
         }
 
@@ -141,7 +142,6 @@ namespace Mago
                 if (_isMaximized == value) return;
                 _isMaximized = value;
                 Application.Current.MainWindow.WindowState = _isMaximized ? WindowState.Maximized : WindowState.Normal;
-
             }
         }
 
@@ -153,6 +153,8 @@ namespace Mago
                 if (_darkThemeEnabled == value) return;
                 _darkThemeEnabled = value;
                 Application.Current.Resources.MergedDictionaries[0].Source = _darkThemeEnabled ? darkTheme : lightTheme;
+                
+                Parent.Settings.darkModeEnabled = _darkThemeEnabled;
 
             }
         }

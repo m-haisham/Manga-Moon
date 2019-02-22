@@ -9,7 +9,7 @@ namespace Mago
     [Serializable]
     public class ChSave
     {
-        List<byte[]> Images;
+        public List<byte[]> Images;
 
         public ChSave()
         {

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,6 +17,7 @@ namespace Mago
     {
         private string url;
         private MangaViewModel MangaView;
+        private MainViewModel MainView;
 
         private string _name;
         private string _status;
@@ -26,8 +28,9 @@ namespace Mago
         private ObservableCollection<GenreItemViewModel> _genreList;
         private ObservableCollection<string> _authorList;
 
-        public HtmlPageLoader(MangaViewModel mangaView)
+        public HtmlPageLoader(MainViewModel mainView, MangaViewModel mangaView)
         {
+            MainView = mainView;
             MangaView = mangaView;
         }
 
@@ -226,14 +229,16 @@ namespace Mago
             _chapterList = new ObservableCollection<ChapterListItemViewModel>();
             for (int i = 0; i < chapters.Count; i++)
             {
-                _chapterList.Add(
-                    new ChapterListItemViewModel(MangaView, i)
-                    {
-                        Name = chapters[i].Name,
-                        URL = chapters[i].href,
-                        IsNotDownloaded = true
-                    }
-                );
+                ChapterListItemViewModel model = new ChapterListItemViewModel(MangaView, i)
+                {
+                    Name = chapters[i].Name,
+                    URL = chapters[i].href
+                };
+
+                string chapterPath = MainView.Settings.mangaPath + _name + "/" + model.Name.Replace(' ', '_') + ".ch";
+                model.IsNotDownloaded = !File.Exists(chapterPath);
+
+                _chapterList.Add(model);
             }
             #endregion
         }
@@ -248,6 +253,12 @@ namespace Mago
             MangaView.Description = _description;
 
             MangaView.ChapterList = _chapterList;
+
+            for (int i = 0; i < MangaView.ChapterList.Count; i++)
+            {
+                
+            }
+
             MangaView.GenreList = _genreList;
             MangaView.AuthorList = _authorList;
         }

@@ -43,7 +43,10 @@ namespace Mago
         TokenPool tokenPool = new TokenPool(5);
         Task lastDownloadTask;
         Task currentDownloadTask;
-        
+
+
+        List<byte[]> imageData;
+
         public ReaderViewModel(MainViewModel MainView)
         {
             _pages = new ObservableCollection<PageViewModel>();
@@ -105,53 +108,93 @@ namespace Mago
                 //wait for 25ms
                 await Task.Delay(25);
             }
+            
+            List<string> pagePaths;
 
-            //get current selected chapters url
-            string currentUrl = _chapters[index].url;
+            //downloaded chapter path
+            string chapterPath = MainViewModel.Settings.mangaPath + MangaName + "/" + ChapterNames[index].Replace(' ', '_') + ".ch";
 
-            //get page paths
-            List<string> pagePaths = await GetPagePaths(currentUrl);
-
-            //Itereate through pages
-            for (int i = 0; i < pagePaths.Count; i++)
+            //if chapter hasn't been downloaded, download
+            if (!File.Exists(chapterPath))
             {
-                BitmapImage imageSource;
+                //get current selected chapters url
+                string currentUrl = _chapters[index].url;
 
-                //if chapter already downloaded
-                if(_chapters[(int)SelectedChapterIndex].imageTempPaths.Count >= i + 1 && _chapters[(int)SelectedChapterIndex].imageTempPaths[i] != null)
+                //get page paths
+                pagePaths = await GetPagePaths(currentUrl);
+
+                //Itereate through pages
+                for (int i = 0; i < pagePaths.Count; i++)
                 {
-                    //load image from byte array on file
-                    imageSource = LoadBitmapFromArrayFile(_chapters[(int)SelectedChapterIndex].imageTempPaths[i]);
+                    BitmapImage imageSource;
+
+                    //if chapter already downloaded
+                    if (_chapters[(int)SelectedChapterIndex].imageTempPaths.Count >= i + 1 && _chapters[(int)SelectedChapterIndex].imageTempPaths[i] != null)
+                    {
+                        //load image from byte array on file
+                        imageSource = LoadBitmapFromArrayFile(_chapters[(int)SelectedChapterIndex].imageTempPaths[i]);
+                    }
+                    else
+                    {
+                        //Download the data to byte array
+                        byte[] byteArray = DataConversionHelper.DownloadToArray(pagePaths[i]);
+
+                        //save byte array to temporary file
+                        string tempPath = SaveByteArrayToTempFile(byteArray);
+
+                        //record temporary path
+                        _chapters[(int)SelectedChapterIndex].imageTempPaths.Add(tempPath);
+
+                        //convert array to Bitmap
+                        imageSource = byteArray.ToFreezedBitmapImage();
+                    }
+
+                    //check for cancellation before applying image
+                    token.ThrowIfCancellationRequested();
+
+                    //Call main thread to add to collection
+                    Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(imageSource); });
                 }
-                else
+
+                if (MainViewModel.Settings.autoDownloadReadChapters)
                 {
-                    //Download the data to byte array
-                    byte[] byteArray = DataConversionHelper.DownloadToArray(pagePaths[i]);
+                    //save the downloaded
+                    SaveChapter((int)SelectedChapterIndex, chapterPath);
+                }
+            }
+            else // read chapter from memory
+            {
+                //load data from chapter file
+                imageData = SaveSystem.LoadBinary<ChSave>(chapterPath).Images;
 
-                    //save byte array to temporary file
-                    string tempPath = SaveByteArrayToTempFile(byteArray);
-
-                    //record temporary path
-                    _chapters[(int)SelectedChapterIndex].imageTempPaths.Add(tempPath);
+                //iterate through all data
+                for (int i = 0; i < imageData.Count; i++)
+                {
+                    //Create image from byte array
+                    BitmapImage image = imageData[i].ToFreezedBitmapImage();
                     
-                    //convert array to Bitmap
-                    imageSource = byteArray.ToFreezedBitmapImage();
+                    //Call main thread to add to collection
+                    Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(image); } );
+                    
                 }
                 
-                //check for cancellation before applying image
-                token.ThrowIfCancellationRequested();
-                
-                //Call main thread to add to collection
-                Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(imageSource); });
+                //GC.Collect();
             }
 
-            //Rise notification
-            Application.Current.Dispatcher.Invoke(() => MainViewModel.NotificationsViewModel.AddNotification("Current chapter fully loaded", NotificationMode.Success));
+            //Rise notification according to settings
+            if(MainViewModel.Settings.chapterReaderLoadNotifications)
+                Application.Current.Dispatcher.Invoke(() => MainViewModel.NotificationsViewModel.AddNotification("Current chapter fully loaded", NotificationMode.Success));
 
             #region Download next chapter to temporary path
 
             //if next chapter doesnt exist exit method
             if (!NextChapterExists) return;
+
+            //Save path for Next chapter
+            string NextchapterPath = MainViewModel.Settings.mangaPath + MangaName + "/" + ChapterNames[index + 1].Replace(' ', '_') + ".ch";
+
+            //if next chapter downloaded exit method
+            if (File.Exists(NextchapterPath)) return;
 
             //Next chapters url
             string NextUrl = _chapters[index + 1].url;
@@ -178,6 +221,12 @@ namespace Mago
                     _chapters[(int)SelectedChapterIndex + 1].imageTempPaths.Add(tempPath);
                 }
                 
+            }
+
+            if (MainViewModel.Settings.autoDownloadReadChapters)
+            {
+                //save the downloaded
+                SaveChapter((int)SelectedChapterIndex + 1, NextchapterPath);
             }
 
             #endregion
@@ -278,6 +327,23 @@ namespace Mago
             return image;
         }
         
+        public void SaveChapter(int index, string path)
+        {
+
+            List<byte[]> byteList = new List<byte[]>();
+            for (int i = 0; i < _chapters[index].imageTempPaths.Count; i++)
+            {
+                //new temp path
+                string temp = _chapters[index].imageTempPaths[i];
+
+                //load and add to byteList
+                byteList.Add(File.ReadAllBytes(temp));
+            }
+
+            //Create new chSave class and save to path
+            SaveSystem.SaveBinary(new ChSave(byteList), path);
+        }
+
         public void ClearTemporary()
         {
             //for all chapters
@@ -408,7 +474,7 @@ namespace Mago
 
                 //clear current pages
                 _pages.Clear();
-
+                
                 //assign new download task
                 currentDownloadTask = Task.Run(() => LoadChapterAsync((int)_selectedChapterIndex, newToken), newToken);
             }

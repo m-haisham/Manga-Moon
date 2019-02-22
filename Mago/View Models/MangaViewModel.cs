@@ -44,7 +44,7 @@ namespace Mago
             List<int> SelectedIndexList = new List<int>();
             for (int i = 0; i < ChapterList.Count; i++)
             {
-                if (ChapterList[i].IsSelected)
+                if (ChapterList[i].IsSelected && ChapterList[i].IsNotDownloaded == true)
                     SelectedIndexList.Add(i);
             }
             SelectedIndexList.Reverse();
@@ -58,7 +58,7 @@ namespace Mago
 
         public void AddtoDownloads(ChapterListItemViewModel chapter)
         {
-            MainView.DownloadsPanelViewModel.AddDownload(chapter.URL, Name);
+            MainView.DownloadsPanelViewModel.AddDownload(chapter.URL, chapter.Name, Name);
         }
 
         public async Task OpenInReader(int index)
