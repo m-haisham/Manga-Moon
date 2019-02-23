@@ -41,8 +41,14 @@
     <Reference Include="Chapter Library">
       <HintPath>..\..\..\..\source\repos\Chapter Library\Chapter Library\bin\Release\Chapter Library.dll</HintPath>
     </Reference>
+    <Reference Include="ControlzEx, Version=3.0.2.4, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net45\ControlzEx.dll</HintPath>
+    </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.8.14.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\HtmlAgilityPack.1.8.14\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="MahApps.Metro, Version=1.6.5.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.6.5\lib\net46\MahApps.Metro.dll</HintPath>
     </Reference>
     <Reference Include="MaterialDesignColors, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignColors.1.1.3\lib\net45\MaterialDesignColors.dll</HintPath>
@@ -59,6 +65,9 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net45\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -88,6 +97,7 @@
     <Compile Include="Classes\SaveSystem.cs" />
     <Compile Include="Classes\ScrollViewerBehavior.cs" />
     <Compile Include="Classes\Serialized\ChSave.cs" />
+    <Compile Include="Classes\Serialized\MgiSave.cs" />
     <Compile Include="Classes\Serialized\Settings.cs" />
     <Compile Include="Classes\TokenPool.cs" />
     <Compile Include="UserControls\DownloadsQueue.xaml.cs">
@@ -104,7 +114,9 @@
     </Compile>
     <Compile Include="View Models\ChapterHolder.cs" />
     <Compile Include="View Models\ChapterListItemViewModel.cs" />
+    <Compile Include="View Models\DownloadedItemViewModel.cs" />
     <Compile Include="View Models\DownloadsPanelViewModel.cs" />
+    <Compile Include="View Models\DownloadsViewerViewModel.cs" />
     <Compile Include="View Models\FindByViewModel.cs" />
     <Compile Include="View Models\GenreItemViewModel.cs" />
     <Compile Include="Classes\HtmlPageLoader.cs" />

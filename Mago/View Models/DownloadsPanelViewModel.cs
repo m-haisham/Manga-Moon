@@ -268,7 +268,7 @@ namespace Mago
                 ChSave chSave = new ChSave(LoadPaths(item.tempPaths));
 
                 //create path for download
-                string savePath = MainView.Settings.mangaPath + item.Header + "/" + item.Description + ".ch";
+                string savePath = MainView.Settings.mangaPath + item.Header + "/" + item.Description.Replace(" ", "_") + ".ch";
 
                 //Save file to path
                 SaveSystem.SaveBinary(chSave, savePath);
@@ -283,7 +283,7 @@ namespace Mago
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     if (MainView.Settings.chapterDownloadNotifications)
-                        MainView.NotificationsViewModel.AddNotification(item.Description + " Download Complete.", NotificationMode.Success);
+                        MainView.NotificationsViewModel.AddNotification(item.Header + ": " + item.Description + " Download Complete.", NotificationMode.Success);
                     if (MainView.Settings.autoDeleteCompletedDownloads)
                         DownloadsPanel.Remove(item);
                 });

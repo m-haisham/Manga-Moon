@@ -15,11 +15,11 @@ namespace Mago
         private MangaViewModel _mangaViewModel;
         private ReaderViewModel _readerViewModel;
         private NotificationsViewModel _notificationsViewModel;
+        private DownloadsViewerViewModel _downloadsViewerViewModel;
 
         public MainViewModel()
         {
 
-            HtmlPageLoader = new HtmlPageLoader(this, _mangaViewModel);
             Settings = SaveSystem.LoadSettings();
 
             _downloadsPanelViewModel = new DownloadsPanelViewModel(this);
@@ -28,8 +28,9 @@ namespace Mago
             _findByViewModel = new FindByViewModel(this, HtmlPageLoader);
             _mangaViewModel = new MangaViewModel(this);
             _readerViewModel = new ReaderViewModel(this);
+            _downloadsViewerViewModel = new DownloadsViewerViewModel(this);
 
-            
+            HtmlPageLoader = new HtmlPageLoader(this, _mangaViewModel);
             //HtmlPageLoader.LoadData("https://mangakakalot.com/manga/moshi_fanren");
             //HtmlPageLoader.ApplyData();
         }
@@ -43,6 +44,7 @@ namespace Mago
         public FindByViewModel FindByViewModel => _findByViewModel;
         public MangaViewModel MangaViewModel => _mangaViewModel;
         public ReaderViewModel ReaderViewModel => _readerViewModel;
-        
+        public DownloadsViewerViewModel DownloadsViewerViewModel => _downloadsViewerViewModel;
+
     }
 }

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Mago"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
@@ -11,8 +12,8 @@
         TextElement.FontSize="14"
         FontFamily="pack://application:,,,/MaterialDesignThemes.Wpf;component/Resources/Roboto/#Roboto" 
         mc:Ignorable="d"
-        Title="MainWindow"   Height="768" Width="1366" WindowStartupLocation="CenterScreen" WindowStyle="None">
-
+        Title="Mago" Height="768" Width="1366" WindowStartupLocation="CenterScreen" WindowStyle="None">
+    
     <materialDesign:DialogHost Identifier="RootDialog" SnackbarMessageQueue="{Binding ElementName=MainSnackbar, Path=MessageQueue}">
         <materialDesign:DrawerHost IsLeftDrawerOpen="{Binding MenuViewModel.IsMenuOpen}">
             <materialDesign:DrawerHost.LeftDrawerContent>
@@ -256,6 +257,47 @@
                                 <materialDesign:SlideOutWipe/>
                             </materialDesign:TransitionerSlide.ForwardWipe>
                             <!--Downloads-->
+
+                            <DockPanel>
+                                <TextBlock
+                                    Text="DOWNLOADS"
+                                    Style="{StaticResource MaterialDesignSubheadingTextBlock}"
+                                    FontWeight="Black"
+                                    TextAlignment="Center"
+                                    Margin="10"
+                                    DockPanel.Dock="Top"/>
+                                <ScrollViewer
+                                    Padding="20, 0"
+                                    VerticalScrollBarVisibility="Auto"
+                                    DockPanel.Dock="Top">
+                                    <ItemsControl
+                                        ItemsSource="{Binding DownloadsViewerViewModel.DownloadedItems}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate
+                                                DataType="{x:Type local:DownloadedItemViewModel}">
+                                                <materialDesign:Card
+                                                    DockPanel.Dock="Top"
+                                                    Margin="5"
+                                                    HorizontalAlignment="Center">
+                                                    <Button
+                                                        Style="{StaticResource MaterialDesignToolButton}"
+                                                        Command="{Binding Read}">
+                                                        <TextBlock 
+                                                            Text="{Binding Text}"
+                                                            Margin="10, 0"
+                                                            TextWrapping="Wrap"/>
+                                                    </Button>
+                                                </materialDesign:Card>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </DockPanel>
                         </materialDesign:TransitionerSlide>
                         
                         <materialDesign:TransitionerSlide>
@@ -343,12 +385,14 @@
                                     </ToggleButton>
                                     <DockPanel>
                                         <ScrollViewer
+                                            VirtualizingPanel.IsVirtualizing="True"
                                             HorizontalAlignment="Stretch"
                                             VerticalScrollBarVisibility="Auto"
                                             local:ScrollViewerBehavior.AutoScrollToTop="{Binding ReaderViewModel.ScrollTop, Mode=TwoWay}"
                                             PreviewMouseWheel="ScrollViewer_PreviewMouseWheel"
                                             CanContentScroll="False">
-                                            <StackPanel>
+                                            <VirtualizingStackPanel
+                                                VirtualizingPanel.IsVirtualizing="True">
                                                 <Button
                                                     Content="PREVIOUS CHAPTER"
                                                     FontSize="20"
@@ -357,8 +401,10 @@
                                                     IsEnabled="{Binding ReaderViewModel.LastChapterExists}"
                                                     Style="{StaticResource MaterialDesignFlatButton}"/>
                                                 <ItemsControl
-                                                    ItemsSource="{Binding ReaderViewModel.Pages}">
-                                                        <ItemsControl.ItemTemplate>
+                                                    ItemsSource="{Binding ReaderViewModel.Pages}"
+                                                    VirtualizingPanel.IsVirtualizing="True"
+                                                    ScrollViewer.CanContentScroll="True">
+                                                    <ItemsControl.ItemTemplate>
                                                         <DataTemplate
                                                             DataType="{x:Type local:PageViewModel}">
                                                             <materialDesign:Card
@@ -380,7 +426,7 @@
                                                     Command="{Binding ReaderViewModel.LoadNext}"
                                                     IsEnabled="{Binding ReaderViewModel.NextChapterExists}"
                                                     Style="{StaticResource MaterialDesignFlatButton}"/>
-                                            </StackPanel>
+                                            </VirtualizingStackPanel>
                                         </ScrollViewer>
                                     </DockPanel>
                                 </Grid>

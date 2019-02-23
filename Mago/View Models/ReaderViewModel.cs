@@ -178,7 +178,6 @@ namespace Mago
                     
                 }
                 
-                //GC.Collect();
             }
 
             //Rise notification according to settings
@@ -188,13 +187,13 @@ namespace Mago
             #region Download next chapter to temporary path
 
             //if next chapter doesnt exist exit method
-            if (!NextChapterExists) return;
+            if (!NextChapterExists) { GC.Collect(); return; }
 
             //Save path for Next chapter
             string NextchapterPath = MainViewModel.Settings.mangaPath + MangaName + "/" + ChapterNames[index + 1].Replace(' ', '_') + ".ch";
 
             //if next chapter downloaded exit method
-            if (File.Exists(NextchapterPath)) return;
+            if (File.Exists(NextchapterPath)) { GC.Collect(); return; }
 
             //Next chapters url
             string NextUrl = _chapters[index + 1].url;
@@ -229,6 +228,7 @@ namespace Mago
                 SaveChapter((int)SelectedChapterIndex + 1, NextchapterPath);
             }
 
+            GC.Collect();
             #endregion
         }
 
@@ -473,7 +473,10 @@ namespace Mago
                 _ScrollTop = false;
 
                 //clear current pages
-                _pages.Clear();
+                if (_pages == null)
+                    _pages = new ObservableCollection<PageViewModel>();
+                else
+                    _pages.Clear();
                 
                 //assign new download task
                 currentDownloadTask = Task.Run(() => LoadChapterAsync((int)_selectedChapterIndex, newToken), newToken);

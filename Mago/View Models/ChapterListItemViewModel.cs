@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,6 +32,18 @@ namespace Mago
 
             DownloadChapter = new RelayCommand(AddToDownloadQueue);
             ReadChapter = new RelayCommand(Read);
+        }
+
+       public void CheckIfDownloaded()
+        {
+            string chapterPath = Parent.MainView.Settings.mangaPath + Parent.Name + "/" + _name.Replace(' ', '_') + ".ch";
+
+            chapterPath = chapterPath.Replace(":", string.Empty);
+            chapterPath = chapterPath.Replace("|", string.Empty);
+            chapterPath = chapterPath.Replace("?", string.Empty);
+            chapterPath = chapterPath.Replace("__", "_");
+
+            this.IsNotDownloaded = !File.Exists(chapterPath);
         }
 
         private void AddToDownloadQueue()

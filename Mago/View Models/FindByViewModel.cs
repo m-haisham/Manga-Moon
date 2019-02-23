@@ -38,6 +38,7 @@ namespace Mago
             FindByURL = new RelayCommand(() => Task.Run(SearchWithURL));
 
             mainView = mainViewModel;
+
         }
 
         async Task SearchWithName()
@@ -71,7 +72,7 @@ namespace Mago
             await mainView.HtmlPageLoader.LoadData(url);
 
             //apply the data
-            mainView.HtmlPageLoader.ApplyData();
+            await mainView.HtmlPageLoader.ApplyData();
 
             //clear button loading
             NameIsIndeterminate = false;

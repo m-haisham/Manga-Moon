@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using HtmlAgilityPack;
 
@@ -56,7 +57,7 @@ namespace Mago
             string imageSource = img.Attributes["src"].Value;
 
             //Get Status
-            string status = infonodes.ElementAt(2).InnerText.Substring(9); 
+            string status = infonodes.ElementAt(2).InnerText.Substring(9);
 
             //Get Authors
             ObservableCollection<string> authors = new ObservableCollection<string>();
@@ -77,7 +78,7 @@ namespace Mago
             }
 
             //Get Description
-            HtmlNodeCollection descriptionNodes =  doc.DocumentNode.SelectNodes("//div[@id='noidungm']/text()");
+            HtmlNodeCollection descriptionNodes = doc.DocumentNode.SelectNodes("//div[@id='noidungm']/text()");
 
             StringBuilder sb = new StringBuilder();
 
@@ -112,7 +113,7 @@ namespace Mago
             _status = status;
             _image = imageSource.ToFreezedBitmapImage();
             _description = description;
-            
+
             _authorList = authors;
 
             _genreList = new ObservableCollection<GenreItemViewModel>();
@@ -125,7 +126,7 @@ namespace Mago
             }
 
             _chapterList = new ObservableCollection<ChapterListItemViewModel>();
-            for(int i = 0; i < chapters.Count; i++)
+            for (int i = 0; i < chapters.Count; i++)
             {
                 _chapterList.Add(
                     new ChapterListItemViewModel(MangaView, i)
@@ -235,32 +236,29 @@ namespace Mago
                     URL = chapters[i].href
                 };
 
-                string chapterPath = MainView.Settings.mangaPath + _name + "/" + model.Name.Replace(' ', '_') + ".ch";
-                model.IsNotDownloaded = !File.Exists(chapterPath);
+                model.CheckIfDownloaded();
 
                 _chapterList.Add(model);
             }
             #endregion
         }
 
-        public void ApplyData()
+        public async Task ApplyData()
         {
-            MangaView.Url = url; 
+            MangaView.Url = url;
 
             MangaView.Name = _name;
             MangaView.MangaStatus = _status;
             MangaView.ImageSource = _image;
             MangaView.Description = _description;
 
-            MangaView.ChapterList = _chapterList;
-
-            for (int i = 0; i < MangaView.ChapterList.Count; i++)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                
-            }
+                MangaView.ChapterList = _chapterList;
 
-            MangaView.GenreList = _genreList;
-            MangaView.AuthorList = _authorList;
+                MangaView.GenreList = _genreList;
+                MangaView.AuthorList = _authorList;
+            });
         }
     }
 }

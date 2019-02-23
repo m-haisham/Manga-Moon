@@ -152,7 +152,7 @@ namespace Mago
             {
                 if (_darkThemeEnabled == value) return;
                 _darkThemeEnabled = value;
-                Application.Current.Resources.MergedDictionaries[0].Source = _darkThemeEnabled ? darkTheme : lightTheme;
+                Application.Current.Resources.MergedDictionaries[5].Source = _darkThemeEnabled ? darkTheme : lightTheme;
                 
                 Parent.Settings.darkModeEnabled = _darkThemeEnabled;
 

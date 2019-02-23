@@ -51,6 +51,19 @@ namespace Mago
             return web.DownloadData(url);
         }
 
+        public static byte[] ToByteArray(this BitmapImage image)
+        {
+            byte[] data;
+            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(image));
+            using (MemoryStream ms = new MemoryStream())
+            {
+                encoder.Save(ms);
+                data = ms.ToArray();
+            }
+            return data;
+        }
+
         public static BitmapImage ToFreezedBitmapImage(this string url)
         {
             var image = url.ToBitmapImage();
