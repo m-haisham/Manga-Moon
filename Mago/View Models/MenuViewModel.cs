@@ -35,6 +35,8 @@ namespace Mago
         public ICommand Favourites { get; set; }
         public ICommand Name { get; set; }
         public ICommand URL { get; set; }
+        public ICommand Reader { get; set; }
+        public ICommand Manga { get; set; }
 
         #endregion
 
@@ -55,6 +57,8 @@ namespace Mago
             Favourites = new RelayCommand(OpenFavourites);
             Name = new RelayCommand(OpenByName);
             URL = new RelayCommand(OpenByURL);
+            Reader = new RelayCommand(OpenReader);
+            Manga = new RelayCommand(OpenInfoView);
         }
 
         public void OpenRecents()

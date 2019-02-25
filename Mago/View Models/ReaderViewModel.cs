@@ -187,13 +187,13 @@ namespace Mago
             #region Download next chapter to temporary path
 
             //if next chapter doesnt exist exit method
-            if (!NextChapterExists) { GC.Collect(); return; }
+            if (!NextChapterExists) return;
 
             //Save path for Next chapter
             string NextchapterPath = MainViewModel.Settings.mangaPath + MangaName + "/" + ChapterNames[index + 1].Replace(' ', '_') + ".ch";
 
             //if next chapter downloaded exit method
-            if (File.Exists(NextchapterPath)) { GC.Collect(); return; }
+            if (File.Exists(NextchapterPath)) return;
 
             //Next chapters url
             string NextUrl = _chapters[index + 1].url;
@@ -227,8 +227,7 @@ namespace Mago
                 //save the downloaded
                 SaveChapter((int)SelectedChapterIndex + 1, NextchapterPath);
             }
-
-            GC.Collect();
+            
             #endregion
         }
 
