@@ -23,7 +23,6 @@ namespace Mago
                 image.BeginInit();
                 image.CacheOption = BitmapCacheOption.OnLoad;
                 image.StreamSource = ms;
-                image.DecodePixelWidth = 500;
                 image.EndInit();
                 image.Freeze();
             }

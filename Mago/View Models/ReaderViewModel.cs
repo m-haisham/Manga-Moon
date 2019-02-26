@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using MaterialDesignThemes.Wpf;
 using System.IO;
+using System.Net;
 
 namespace Mago
 {
@@ -30,8 +31,14 @@ namespace Mago
         private bool _ScrollTop;
 
         private int _selectedZoomIndex;
+        private float _zoomSlider;
         private int _selectedMarginIndex;
         private int? _selectedChapterIndex = null;
+
+        private int _pagesDownloadValue;
+        private int _pageDownloadValue;
+        private int _pageCount;
+        private Visibility _checkVisibility;
 
         public ICommand LoadPrevious { get; set; }
         public ICommand LoadNext { get; set; }
@@ -43,8 +50,7 @@ namespace Mago
         TokenPool tokenPool = new TokenPool(5);
         Task lastDownloadTask;
         Task currentDownloadTask;
-
-
+        
         List<byte[]> imageData;
 
         public ReaderViewModel(MainViewModel MainView)
@@ -54,6 +60,7 @@ namespace Mago
             _margin = new ObservableCollection<int> { 0, 5 };
             SelectedMarginIndex = 1;
             SelectedZoomIndex = 3;
+            ZoomSlider = 100;
             LoadNext = new RelayCommand(AdvanceSelected);
             LoadPrevious = new RelayCommand(BackSelected);
             MainViewModel = MainView;
@@ -108,7 +115,9 @@ namespace Mago
                 //wait for 25ms
                 await Task.Delay(25);
             }
-            
+
+            CheckVisibility = Visibility.Hidden;
+
             List<string> pagePaths;
 
             //downloaded chapter path
@@ -123,6 +132,12 @@ namespace Mago
                 //get page paths
                 pagePaths = await GetPagePaths(currentUrl);
 
+                //set maximum of page downloads progress bar
+                PageCount = pagePaths.Count;
+
+                //reset downloaded value
+                PagesDownloadValue = 0;
+
                 //Itereate through pages
                 for (int i = 0; i < pagePaths.Count; i++)
                 {
@@ -136,8 +151,13 @@ namespace Mago
                     }
                     else
                     {
+
+                        WebClient web = new WebClient();
+                        web.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
+                        byte[] byteArray = await web.DownloadDataTaskAsync(pagePaths[i]);
+
                         //Download the data to byte array
-                        byte[] byteArray = DataConversionHelper.DownloadToArray(pagePaths[i]);
+                        //byte[] byteArray = DataConversionHelper.DownloadToArray(pagePaths[i]);
 
                         //save byte array to temporary file
                         string tempPath = SaveByteArrayToTempFile(byteArray);
@@ -154,6 +174,9 @@ namespace Mago
 
                     //Call main thread to add to collection
                     Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(imageSource); });
+
+                    //append downloaded chapter value
+                    PagesDownloadValue += 1;
                 }
 
                 if (MainViewModel.Settings.autoDownloadReadChapters)
@@ -167,6 +190,12 @@ namespace Mago
                 //load data from chapter file
                 imageData = SaveSystem.LoadBinary<ChSave>(chapterPath).Images;
 
+                //set maximum of page downloads progress bar
+                PageCount = imageData.Count;
+
+                //reset downloaded value
+                PagesDownloadValue = 0;
+
                 //iterate through all data
                 for (int i = 0; i < imageData.Count; i++)
                 {
@@ -175,14 +204,18 @@ namespace Mago
                     
                     //Call main thread to add to collection
                     Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(image); } );
+
+                    //append downloaded chapter value
+                    PagesDownloadValue += 1;
                     
                 }
-                
             }
 
             //Rise notification according to settings
             if(MainViewModel.Settings.chapterReaderLoadNotifications)
                 Application.Current.Dispatcher.Invoke(() => MainViewModel.NotificationsViewModel.AddNotification("Current chapter fully loaded", NotificationMode.Success));
+
+            CheckVisibility = Visibility.Visible;
 
             #region Download next chapter to temporary path
 
@@ -229,6 +262,14 @@ namespace Mago
             }
             
             #endregion
+        }
+
+        void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            double bytesIn = double.Parse(e.BytesReceived.ToString());
+            double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
+            double percentage = bytesIn / totalBytes * 100;
+            PageDownloadValue = e.ProgressPercentage;
         }
 
         public async Task SetChapterData(ObservableCollection<ChapterInfo> infoList)
@@ -364,28 +405,24 @@ namespace Mago
         {
             URL = url;
         }
-
         public void AdvanceSelected()
         {
             SelectedChapterIndex += 1;
         }
-
         public void BackSelected()
         {
             SelectedChapterIndex -= 1;
         }
-
         public void CalculateChapterInfo()
         {
             NextChapterExists = SelectedChapterIndex < _chapters.Count - 1;
             LastChapterExists = SelectedChapterIndex > 0;
         }
-        
-        public void ApplyZoom()
+        public void ApplyZoom(float zoom)
         {
             foreach (var page in Pages)
             {
-                page.Zoom = (float)_zoom[_selectedZoomIndex] / 100f;
+                page.Zoom = zoom / 100f;
             }
         }
         public void ApplyMargin()
@@ -426,7 +463,6 @@ namespace Mago
                 _mangaName = value;
             }
         }
-
         public int SelectedZoomIndex
         {
             get { return _selectedZoomIndex; }
@@ -434,7 +470,17 @@ namespace Mago
             {
                 if (_selectedZoomIndex == value) return;
                 _selectedZoomIndex = value;
-                ApplyZoom();
+                ApplyZoom((float)_zoom[_selectedZoomIndex]);
+            }
+        }
+        public float ZoomSlider
+        {
+            get{ return _zoomSlider; }
+            set
+            {
+                if (_zoomSlider == value) return;
+                _zoomSlider = value;
+                ApplyZoom(_zoomSlider);
             }
         }
         public int SelectedMarginIndex
@@ -481,7 +527,6 @@ namespace Mago
                 currentDownloadTask = Task.Run(() => LoadChapterAsync((int)_selectedChapterIndex, newToken), newToken);
             }
         }
-
         public bool IsTopBarOpen
         {
             get { return _isTopBarOpen; }
@@ -515,6 +560,42 @@ namespace Mago
             set
             {
                 _ScrollTop = value;
+            }
+        }
+        public int PageCount
+        {
+            get { return _pageCount; }
+            set
+            {
+                if (_pageCount == value) return;
+                _pageCount = value;
+            }
+        }
+        public int PagesDownloadValue
+        {
+            get { return _pagesDownloadValue; }
+            set
+            {
+                if (_pagesDownloadValue == value) return;
+                _pagesDownloadValue = value;
+            }
+        }
+        public int PageDownloadValue
+        {
+            get { return _pageDownloadValue; }
+            set
+            {
+                if (_pageDownloadValue == value) return;
+                _pageDownloadValue = value;
+            }
+        }
+        public Visibility CheckVisibility
+        {
+            get { return _checkVisibility; }
+            set
+            {
+                if (_checkVisibility == value) return;
+                _checkVisibility = value;
             }
         }
     }

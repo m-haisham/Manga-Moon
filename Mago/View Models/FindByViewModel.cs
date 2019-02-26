@@ -16,6 +16,7 @@ namespace Mago
     {
         private string _mangaName;
         private string _mangaURL;
+        private string _searchBox;
         private ObservableCollection<string> _suitableMangaSources;
         private int _selectedIndex = 0;
         private Visibility _warningIconVisibility = Visibility.Hidden;
@@ -29,19 +30,30 @@ namespace Mago
 
         public ICommand FindByName { get; set; }
         public ICommand FindByURL { get; set; }
+        public ICommand FindCommand { get; set; }
 
         public FindByViewModel(MainViewModel mainViewModel, HtmlPageLoader pageLoader)
         {
             _suitableMangaSources = new ObservableCollection<string> { "Mangakakalot.com" };
 
-            FindByName = new RelayCommand(() => Task.Run(SearchWithName));
-            FindByURL = new RelayCommand(() => Task.Run(SearchWithURL));
+            //FindByName = new RelayCommand(() => Task.Run(SearchWithName));
+            //FindByURL = new RelayCommand(() => Task.Run(SearchWithURL));
+            FindCommand = new RelayCommand(Find);
 
             mainView = mainViewModel;
 
         }
 
-        async Task SearchWithName()
+        public void Find()
+        {
+            if (_searchBox == string.Empty) return;
+            if (_searchBox.StartsWith("https://"))
+                Task.Run(() => SearchWithURL(_searchBox));
+            else
+                Task.Run(() => SearchWithName(_searchBox));
+        }
+
+        async Task SearchWithName(string MangaName)
         {
             if (MangaName == null)
                 return;
@@ -54,7 +66,7 @@ namespace Mago
             OpenManga(n_url);
         }
 
-        async Task SearchWithURL()
+        async Task SearchWithURL(string MangaURL)
         {
             if (MangaURL == null)
                 return;
@@ -124,6 +136,15 @@ namespace Mago
             {
                 if (_mangaURL == value) return;
                 _mangaURL = value;
+            }
+        }
+        public string SearchBox
+        {
+            get { return _searchBox; }
+            set
+            {
+                if (_searchBox == value) return;
+                _searchBox = value;
             }
         }
         public int SelectedIndex

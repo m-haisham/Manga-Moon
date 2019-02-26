@@ -14,7 +14,7 @@
         mc:Ignorable="d"
         GlowBrush="{StaticResource AccentColorBrush}"
         ShowSystemMenuOnRightClick="False"
-        Title="Mago" Height="768" Width="1366" WindowStartupLocation="CenterScreen">
+        Title="Mago" Height="768" Width="1366" MinHeight="600" MinWidth="800" WindowStartupLocation="CenterScreen">
 
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
@@ -28,11 +28,12 @@
                     <TextBox Grid.Column="1" Margin="5 0 0 0"
                        materialDesign:HintAssist.Hint="Search"
                        materialDesign:TextFieldAssist.DecorationVisibility="Hidden" BorderThickness="0"
-                       MinWidth="200" VerticalAlignment="Center" />
+                       MinWidth="200" VerticalAlignment="Center"
+                       Text="{Binding FindByViewModel.SearchBox}"/>
                     <Button Style="{DynamicResource MaterialDesignToolButton}" 
-                        Command="{Binding SearchCommand}"
-                        CommandParameter="{Binding ElementName=SearchBox, Path=Text}"
-                        Height="15" Width="15">
+                        Command="{Binding FindByViewModel.FindCommand}"
+                        Height="15" Width="15"
+                        Margin="5 0 0 0">
                         <materialDesign:PackIcon Kind="Magnify" Opacity=".56" Width="10" Height="10"
                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Button>
@@ -110,7 +111,7 @@
                         </MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="Info">
+                    <MenuItem Header="About">
                         <MenuItem.Icon>
                             <materialDesign:PackIcon Kind="Information"/>
                         </MenuItem.Icon>
@@ -268,70 +269,6 @@
             </materialDesign:DrawerHost.LeftDrawerContent>
             <Grid>
                 <DockPanel>
-                    <!--<materialDesign:ColorZone
-                        DockPanel.Dock="Top"
-                        Mode="PrimaryDark"
-                        Height="40">
-                        <DockPanel>
-                            <StackPanel
-                                DataContext="{Binding DownloadsPanelViewModel}"
-                                DockPanel.Dock="Right"
-                                Orientation="Horizontal">
-                                <materialDesign:Badged
-                                    Name="DownloadsBadge"
-                                    Badge="{Binding DownloadsPanel.Count}"
-                                    VerticalAlignment="Center"
-                                    Height="24"
-                                    Margin="5,10,5,6"
-                                    Width="30">
-                                    <Button
-                                        Name="DownloadQueueButton"
-                                        Style="{StaticResource MaterialDesignToolButton}"
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Center"
-                                        Width="35"
-                                        Margin="5,0,5,0"
-                                        Command="{Binding DownloadsPanelAnimation}">
-                                        <materialDesign:PackIcon
-                                            Kind="Downloads"
-                                            Width="20"
-                                            Height="20"/>
-                                    </Button>
-                                </materialDesign:Badged>
-                                <materialDesign:Badged
-                                    Name="NotificationsBadge"
-                                    Badge=""
-                                    VerticalAlignment="Center"
-                                    Height="24"
-                                    Margin="5,10,10,6"
-                                    Width="30">
-                                    <Button
-                                        Style="{StaticResource MaterialDesignToolButton}"
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Center"
-                                        Width="35"
-                                        Margin="5,0,5,0">
-                                        <materialDesign:PackIcon
-                                            Kind="Notifications"
-                                            Width="20"
-                                            Height="20"/>
-                                    </Button>
-                                </materialDesign:Badged>
-                            </StackPanel>
-                            <StackPanel
-                                Orientation="Horizontal"
-                                Margin="5,0,0,0">
-                                <ToggleButton
-                                    IsChecked="{Binding MenuViewModel.IsMenuOpen}"
-                                    Style="{DynamicResource MaterialDesignHamburgerToggleButton}" />
-                                <TextBlock
-                                        VerticalAlignment="Center"
-                                        Margin="16 0 0 0">
-                                        MAGO
-                                </TextBlock>
-                            </StackPanel>
-                        </DockPanel>
-                    </materialDesign:ColorZone>-->
                     <materialDesign:Transitioner
                         AutoApplyTransitionOrigins="True"
                         Panel.ZIndex="-1"
@@ -545,6 +482,138 @@
                                             </VirtualizingStackPanel>
                                         </ScrollViewer>
                                     </DockPanel>
+
+                                    <StackPanel
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Bottom"
+                                        Margin="20">
+                                        <materialDesign:ColorZone
+                                            Mode="Accent"
+                                            CornerRadius="5">
+                                            <Expander
+                                                Style="{DynamicResource FlatExpander}"
+                                                ExpandDirection="Up"
+                                                Background="Transparent">
+                                                <Expander.Header>
+                                                    <Grid>
+                                                        <materialDesign:PackIcon
+                                                            Kind="Check" Height="30" Width="30"
+                                                            HorizontalAlignment="Center"
+                                                            VerticalAlignment="Center"
+                                                            Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                            Visibility="{Binding ReaderViewModel.CheckVisibility}"/>
+                                                        <ProgressBar
+                                                            Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                                            Width="30" Height="30"
+                                                            Value="{Binding ReaderViewModel.PagesDownloadValue}" Maximum="{Binding ReaderViewModel.PageCount}"/>
+                                                        <ProgressBar
+                                                            Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                                            Width="20" Height="20"
+                                                            Maximum="100" Value="{Binding ReaderViewModel.PageDownloadValue}"/>
+                                                    </Grid>
+                                                </Expander.Header>
+                                                <StackPanel
+                                                    HorizontalAlignment="Center">
+                                                    <Button
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Margin="0, 3"
+                                                        IsEnabled="{Binding ReaderViewModel.NextChapterExists}"
+                                                        Command="{Binding ReaderViewModel.LoadNext}">
+                                                        <materialDesign:PackIcon Kind="PageNext" Width="20" Height="20"/>
+                                                    </Button>
+                                                    <materialDesign:PopupBox
+                                                        HorizontalAlignment="Center"
+                                                        PlacementMode="RightAndAlignMiddles"
+                                                        Margin="0, 3"
+                                                        Padding="0">
+                                                        <materialDesign:PopupBox.ToggleContent>
+                                                            <materialDesign:PackIcon Kind="AlphabetCBox" Width="20" Height="20" Foreground="{DynamicResource PrimaryHueDarkBrush}"/>
+                                                        </materialDesign:PopupBox.ToggleContent>
+                                                        <materialDesign:PopupBox.PopupContent>
+                                                            <materialDesign:ColorZone
+                                                                Margin="0 0 0 0"
+                                                                Mode="Accent">
+                                                                <Grid>
+                                                                    <ComboBox
+                                                                        materialDesign:HintAssist.Hint="Now Reading"
+                                                                        MinWidth="300"
+                                                                        Margin="20 0 20 0"
+                                                                        ItemsSource="{Binding ReaderViewModel.ChapterNames}"
+                                                                        Style="{StaticResource MaterialDesignFloatingHintComboBox}"
+                                                                        SelectedIndex="{Binding ReaderViewModel.SelectedChapterIndex}"
+                                                                        VerticalAlignment="Bottom">
+                                                                        <ComboBox.ItemsPanel>
+                                                                            <ItemsPanelTemplate>
+                                                                                <VirtualizingStackPanel />
+                                                                            </ItemsPanelTemplate>
+                                                                        </ComboBox.ItemsPanel>
+                                                                    </ComboBox>
+                                                                </Grid>
+                                                            </materialDesign:ColorZone>
+                                                        </materialDesign:PopupBox.PopupContent>
+                                                    </materialDesign:PopupBox>
+                                                    <materialDesign:PopupBox
+                                                        HorizontalAlignment="Center"
+                                                        PlacementMode="RightAndAlignMiddles"
+                                                        Margin="0, 3"
+                                                        Padding="0">
+                                                        <materialDesign:PopupBox.ToggleContent>
+                                                            <materialDesign:PackIcon Kind="ZoomIn" Width="20" Height="20" Foreground="{DynamicResource PrimaryHueDarkBrush}"/>
+                                                        </materialDesign:PopupBox.ToggleContent>
+                                                        <materialDesign:PopupBox.PopupContent>
+                                                            <materialDesign:ColorZone
+                                                                Margin="0 -10 0 0"
+                                                                Mode="Accent">
+                                                                <Grid>
+                                                                    <TextBlock
+                                                                        HorizontalAlignment="Center"
+                                                                        VerticalAlignment="Top"
+                                                                        Margin="0 30 0 0">Zoom percent</TextBlock>
+                                                                    <Slider
+                                                                        Margin="0, 10"
+                                                                        Value="{Binding ReaderViewModel.ZoomSlider, Mode=TwoWay}"
+                                                                        Style="{StaticResource MaterialDesignDiscreteSlider}"
+                                                                        Controls:SliderHelper.EnableMouseWheel="ControlFocused"
+                                                                        Width="200" Minimum="25" Maximum="300"/>
+                                                                </Grid>
+                                                            </materialDesign:ColorZone>
+                                                        </materialDesign:PopupBox.PopupContent>
+                                                    </materialDesign:PopupBox>
+                                                    <materialDesign:PopupBox
+                                                        HorizontalAlignment="Center"
+                                                        PlacementMode="RightAndAlignMiddles"
+                                                        Margin="0, 3"
+                                                        Padding="0">
+                                                        <materialDesign:PopupBox.ToggleContent>
+                                                            <materialDesign:PackIcon Kind="Information" Width="20" Height="20" Foreground="{DynamicResource PrimaryHueDarkBrush}"/>
+                                                        </materialDesign:PopupBox.ToggleContent>
+                                                        <materialDesign:PopupBox.PopupContent>
+                                                            <materialDesign:ColorZone
+                                                                Margin="0 0 0 0"
+                                                                Mode="Accent">
+                                                                <DockPanel
+                                                                    Margin="5">
+                                                                    <TextBlock
+                                                                        Text="{Binding ReaderViewModel.MangaName}"
+                                                                        FontWeight="Black"
+                                                                        DockPanel.Dock="Top"/>
+                                                                    <TextBlock
+                                                                    Text="Will be updated later"/>
+                                                                </DockPanel>
+                                                            </materialDesign:ColorZone>
+                                                        </materialDesign:PopupBox.PopupContent>
+                                                    </materialDesign:PopupBox>
+                                                    <Button
+                                                        Style="{StaticResource MaterialDesignFlatButton}"
+                                                        Margin="0, 3"
+                                                        IsEnabled="{Binding ReaderViewModel.LastChapterExists}"
+                                                        Command="{Binding ReaderViewModel.LoadPrevious}">
+                                                        <materialDesign:PackIcon Kind="PagePrevious" Width="20" Height="20"/>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Expander>
+                                        </materialDesign:ColorZone>
+                                    </StackPanel>
                                 </Grid>
                                 <materialDesign:DrawerHost.TopDrawerContent>
                                     <DockPanel
@@ -619,7 +688,7 @@
                     DataContext="{Binding DownloadsPanelViewModel}"
                     SelectedIndex="{Binding AnimationIndex}"
                     AutoApplyTransitionOrigins="True"
-                    Panel.ZIndex="-1">
+                    Panel.ZIndex="0">
                     <materialDesign:TransitionerSlide>
                         <materialDesign:TransitionerSlide.ForwardWipe>
                             <materialDesign:SlideWipe
@@ -680,80 +749,6 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </ScrollViewer>
-                <DockPanel
-                    Visibility="Collapsed">
-                    <TabControl
-                        Controls:TabControlHelper.IsUnderlined="True"
-                        Controls:TabControlHelper.Transition="RightReplace"
-                        Controls:TabControlHelper.Underlined="TabPanel"
-                        Margin="0 2 0 0"
-                        Background="{DynamicResource MaterialDesignPaper}"
-                        DockPanel.Dock="Top" Height="25">
-                        <TabItem>
-                            <TabItem.Header>
-                                <StackPanel
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Margin="5 0">
-                                    <materialDesign:PackIcon Kind="ChromeReaderMode" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                                    <TextBlock
-                                        Text="Reader"
-                                        Margin="5 1 0 0"/>
-                                </StackPanel>
-                            </TabItem.Header>
-                        </TabItem>
-                        <TabItem>
-                            <TabItem.Header>
-                                <StackPanel
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Margin="5 0">
-                                    <materialDesign:PackIcon Kind="Book" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                                    <TextBlock
-                                        Text="Manga"
-                                        Margin="5 1 0 0"/>
-                                </StackPanel>
-                            </TabItem.Header>
-                        </TabItem>
-                        <TabItem>
-                            <TabItem.Header>
-                                <StackPanel
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Margin="5 0">
-                                    <materialDesign:PackIcon Kind="Favorite" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                                    <TextBlock
-                                        Text="Favourites"
-                                        Margin="5 1 0 0"/>
-                                </StackPanel>
-                            </TabItem.Header>
-                        </TabItem>
-                        <TabItem>
-                            <TabItem.Header>
-                                <StackPanel
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Margin="5 0">
-                                    <materialDesign:PackIcon Kind="Downloads" Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                                    <TextBlock
-                                        Text="Downloads"
-                                        Margin="5 1 0 0"/>
-                                </StackPanel>
-                            </TabItem.Header>
-                        </TabItem>
-                    </TabControl>
-                    <StackPanel/>
-                </DockPanel>
-                <StackPanel
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Top">
-                    <Border Background="White" MaxHeight="30" CornerRadius="3" ToolTip="Enter to search, ignore case">
-                    </Border>
-                </StackPanel>
             </Grid>
         </materialDesign:DrawerHost>
     </materialDesign:DialogHost>
