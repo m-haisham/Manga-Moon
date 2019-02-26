@@ -14,7 +14,9 @@
         mc:Ignorable="d"
         GlowBrush="{StaticResource AccentColorBrush}"
         ShowSystemMenuOnRightClick="False"
-        Title="Mago" Height="768" Width="1366" MinHeight="600" MinWidth="800" WindowStartupLocation="CenterScreen">
+        Icon="pack://application:,,,/Icons/manga_moon_icon.ico"
+        ShowIconOnTitleBar="False"
+        Title="Manga Moon" Height="768" Width="1366" MinHeight="600" MinWidth="800" WindowStartupLocation="CenterScreen" WindowState="Maximized">
 
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>

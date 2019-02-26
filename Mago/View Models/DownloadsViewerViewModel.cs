@@ -24,6 +24,7 @@ namespace Mago
 
         private void Setup()
         {
+            if (!Directory.Exists(MainView.Settings.mangaPath)) return;
             string[] items = Directory.GetDirectories(MainView.Settings.mangaPath);
             for (int i = 0; i < items.Length; i++)
             {
