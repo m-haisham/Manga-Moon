@@ -21,6 +21,7 @@ namespace Mago
             Directory.CreateDirectory(Directory.GetParent(path).FullName);
 
             path = path.Replace(":", string.Empty);
+            path = path.Insert(1, ":");
             path = path.Replace("|", string.Empty);
             path = path.Replace("?", string.Empty);
             path = path.Replace("__", "_");

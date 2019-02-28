@@ -44,8 +44,10 @@ namespace Mago
         public ICommand LoadNext { get; set; }
 
         private string URL;
+        public string mangaSavePath;
         private MainViewModel MainViewModel;
         private List<ChapterHolder> _chapters;
+
 
         TokenPool tokenPool = new TokenPool(5);
         Task lastDownloadTask;
@@ -60,7 +62,7 @@ namespace Mago
             _margin = new ObservableCollection<int> { 0, 5 };
             SelectedMarginIndex = 1;
             SelectedZoomIndex = 3;
-            ZoomSlider = 100;
+            ZoomSlider = MainView.Settings.ReaderZoomPercent;
             LoadNext = new RelayCommand(AdvanceSelected);
             LoadPrevious = new RelayCommand(BackSelected);
             MainViewModel = MainView;
@@ -88,6 +90,9 @@ namespace Mago
                 chapters.Add(newChapter);
             }
             chapters = new ObservableCollection<ChapterInfo>(chapters.Reverse());
+
+            while (currentDownloadTask != null)
+                await Task.Delay(1000);
 
             //Call and Wait till main thread updates collection
             await Application.Current.Dispatcher.Invoke(async () => 
@@ -181,6 +186,11 @@ namespace Mago
 
                 if (MainViewModel.Settings.autoDownloadReadChapters)
                 {
+                    if (!File.Exists(mangaSavePath))
+                    {
+                        MainViewModel.MangaViewModel.SaveMangaInfo();
+                    }
+
                     //save the downloaded
                     SaveChapter((int)SelectedChapterIndex, chapterPath);
                 }
@@ -201,18 +211,18 @@ namespace Mago
                 {
                     //Create image from byte array
                     BitmapImage image = imageData[i].ToFreezedBitmapImage();
-                    
+
                     //Call main thread to add to collection
-                    Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(image); } );
+                    Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(image); });
 
                     //append downloaded chapter value
                     PagesDownloadValue += 1;
-                    
+
                 }
             }
 
             //Rise notification according to settings
-            if(MainViewModel.Settings.chapterReaderLoadNotifications)
+            if (MainViewModel.Settings.chapterReaderLoadNotifications)
                 Application.Current.Dispatcher.Invoke(() => MainViewModel.NotificationsViewModel.AddNotification("Current chapter fully loaded", NotificationMode.Success));
 
             CheckVisibility = Visibility.Visible;
@@ -220,13 +230,13 @@ namespace Mago
             #region Download next chapter to temporary path
 
             //if next chapter doesnt exist exit method
-            if (!NextChapterExists) return;
+            if (!NextChapterExists || !MainViewModel.Settings.autoDownloadNextChapter) { currentDownloadTask = null; return; }
 
             //Save path for Next chapter
             string NextchapterPath = MainViewModel.Settings.mangaPath + MangaName + "/" + ChapterNames[index + 1].Replace(' ', '_') + ".ch";
 
             //if next chapter downloaded exit method
-            if (File.Exists(NextchapterPath)) return;
+            if (File.Exists(NextchapterPath)) { currentDownloadTask = null; return; }
 
             //Next chapters url
             string NextUrl = _chapters[index + 1].url;
@@ -260,8 +270,10 @@ namespace Mago
                 //save the downloaded
                 SaveChapter((int)SelectedChapterIndex + 1, NextchapterPath);
             }
-            
+
             #endregion
+
+            currentDownloadTask = null;
         }
 
         void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)

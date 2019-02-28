@@ -19,16 +19,19 @@ namespace Mago
         {
             MainView = mainView;
             _downloadedItems = new ObservableCollection<DownloadedItemViewModel>();
-            Setup();
+            Task.Run(Setup);
         }
 
-        private void Setup()
+        private async Task Setup()
         {
             if (!Directory.Exists(MainView.Settings.mangaPath)) return;
             string[] items = Directory.GetDirectories(MainView.Settings.mangaPath);
             for (int i = 0; i < items.Length; i++)
             {
-                _downloadedItems.Add(new DownloadedItemViewModel(this, items[i].Split('/').Last()));
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _downloadedItems.Add(new DownloadedItemViewModel(this, items[i].Split('/').Last()));
+                });
             }
         }
 

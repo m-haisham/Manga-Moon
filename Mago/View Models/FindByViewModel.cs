@@ -23,7 +23,7 @@ namespace Mago
         private bool _URLIsIndeternimate;
         private bool _URLButtonEnabled = true;
         private bool _NameIsIndeternimate;
-        private bool _NameButtonEnabled = true;
+        private bool _progressEnabled = false;
 
         private MainViewModel mainView;
         private HtmlPageLoader PageLoader;
@@ -47,6 +47,7 @@ namespace Mago
         public void Find()
         {
             if (_searchBox == string.Empty) return;
+            ProgressEnabled = true;
             if (_searchBox.StartsWith("https://"))
                 Task.Run(() => SearchWithURL(_searchBox));
             else
@@ -57,7 +58,6 @@ namespace Mago
         {
             if (MangaName == null)
                 return;
-            NameIsIndeterminate = true;
             string url = ComposeURL(MangaName);
             bool isWebsiteValid = await RemoteFileExists(url);
             if (!isWebsiteValid) { NameIsIndeterminate = false; WarningIconVisibility = Visibility.Visible; return; }
@@ -70,7 +70,6 @@ namespace Mago
         {
             if (MangaURL == null)
                 return;
-            URLIsIndeterminate = true;
             bool isWebsiteValid = await RemoteFileExists(MangaURL);
             if (!isWebsiteValid) { URLIsIndeterminate = false; WarningIconVisibility = Visibility.Visible; return; }
             WarningIconVisibility = Visibility.Hidden;
@@ -87,8 +86,10 @@ namespace Mago
             await mainView.HtmlPageLoader.ApplyData();
 
             //clear button loading
-            NameIsIndeterminate = false;
-            URLIsIndeterminate = false;
+            ProgressEnabled = false;
+
+            //Clear search box text
+            SearchBox = string.Empty;
 
             //Set transitional index to Open Manga viewer
             mainView.MenuViewModel.TransitionIndex = mainView.MenuViewModel.page.MangaInfoView;
@@ -182,7 +183,6 @@ namespace Mago
             {
                 if (_NameIsIndeternimate == value) return;
                 _NameIsIndeternimate = value;
-                NameButtonEnabled = !_NameIsIndeternimate;
 
             }
         }
@@ -195,13 +195,13 @@ namespace Mago
                 _URLButtonEnabled = value;
             }
         }
-        public bool NameButtonEnabled
+        public bool ProgressEnabled
         {
-            get { return _NameButtonEnabled; }
+            get { return _progressEnabled; }
             set
             {
-                if (_NameButtonEnabled == value) return;
-                _NameButtonEnabled = value;
+                if (_progressEnabled == value) return;
+                _progressEnabled = value;
             }
         }
     }

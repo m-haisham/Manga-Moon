@@ -16,11 +16,13 @@ namespace Mago
         private ReaderViewModel _readerViewModel;
         private NotificationsViewModel _notificationsViewModel;
         private DownloadsViewerViewModel _downloadsViewerViewModel;
+        private SettingsPanelViewModel _settingsPanelViewModel;
 
         public MainViewModel()
         {
 
             Settings = SaveSystem.LoadSettings();
+            _settingsPanelViewModel = new SettingsPanelViewModel(this);
 
             _downloadsPanelViewModel = new DownloadsPanelViewModel(this);
             _notificationsViewModel = new NotificationsViewModel();
@@ -45,6 +47,6 @@ namespace Mago
         public MangaViewModel MangaViewModel => _mangaViewModel;
         public ReaderViewModel ReaderViewModel => _readerViewModel;
         public DownloadsViewerViewModel DownloadsViewerViewModel => _downloadsViewerViewModel;
-
+        public SettingsPanelViewModel SettingsPanelViewModel => _settingsPanelViewModel;
     }
 }

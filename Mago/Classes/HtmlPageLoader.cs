@@ -260,5 +260,6 @@ namespace Mago
                 MangaView.AuthorList = _authorList;
             });
         }
+        
     }
 }

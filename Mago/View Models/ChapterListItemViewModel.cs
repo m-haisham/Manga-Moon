@@ -39,6 +39,7 @@ namespace Mago
             string chapterPath = Parent.MainView.Settings.mangaPath + Parent.Name + "/" + _name.Replace(' ', '_') + ".ch";
 
             chapterPath = chapterPath.Replace(":", string.Empty);
+            chapterPath = chapterPath.Insert(1, ":");
             chapterPath = chapterPath.Replace("|", string.Empty);
             chapterPath = chapterPath.Replace("?", string.Empty);
             chapterPath = chapterPath.Replace("__", "_");

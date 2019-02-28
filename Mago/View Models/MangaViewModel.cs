@@ -84,6 +84,7 @@ namespace Mago
         {
             MainView.ReaderViewModel.MangaName = Name;
             MainView.ReaderViewModel.SetURL(Url);
+            MainView.ReaderViewModel.mangaSavePath = mangaSavePath;
 
             await MainView.ReaderViewModel.Setup(_chapterList.Count - index - 1);
 

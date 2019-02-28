@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Mago
@@ -13,7 +14,7 @@ namespace Mago
 
         public DownloadedItemViewModel(DownloadsViewerViewModel parent, string text)
         {
-            _text = text;
+            _text = text.Split('\\').Last();
             Parent = parent;
             Read = new RelayCommand(View);
         }

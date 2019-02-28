@@ -191,6 +191,7 @@ namespace Mago
 
         public void AddDownload(string url, string chapterName, string mangaName)
         {
+            Application.Current.Dispatcher.Invoke(() =>
             _DownloadsPanel.Add(
                 new DownloadProgressViewModel
                 {
@@ -199,7 +200,7 @@ namespace Mago
                     url = url,
                     Progress = 0,
                     DownloadState = DownloadState.Queued
-                });
+                }));
 
             if(_DownloadsPanel.Where(n => n.DownloadState == DownloadState.Queued).Count() == 1 && !isDownloading)
             {
@@ -288,10 +289,14 @@ namespace Mago
                         DownloadsPanel.Remove(item);
                 });
                 
-
             }
             
             isDownloading = false;
+            if(MainView.Settings.downloadTaskNotifications)
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MainView.NotificationsViewModel.AddNotification("Download Task complete.", NotificationMode.Normal);
+            });
         }
 
         public async Task<List<string>> GetPagePaths(string ChapterPath)

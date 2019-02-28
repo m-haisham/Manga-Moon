@@ -9,20 +9,38 @@ namespace Mago
     [Serializable]
     public class Settings
     {
-        public string mangaPath;
-        public bool chapterReaderLoadNotifications;
-        public bool chapterDownloadNotifications;
-        public bool autoDeleteCompletedDownloads;
-        public bool autoDownloadReadChapters;
+        //theme
         public bool darkModeEnabled;
+        
+        //reader
+        public int ReaderZoomPercent;
+        public bool autoDownloadReadChapters;
+        public bool autoDownloadNextChapter;
+
+        //downloader
+        public string mangaPath;
+        public bool autoDeleteCompletedDownloads;
+
+        //notifications
+        public bool chapterReaderLoadNotifications;
+
+        public bool chapterDownloadNotifications;
+        public bool downloadTaskNotifications;
 
         public Settings()
         {
+            Reset();
+        }
+
+        public void Reset()
+        {
             mangaPath = "Manga/";
+            ReaderZoomPercent = 100;
             chapterReaderLoadNotifications = true;
             chapterDownloadNotifications = true;
             autoDeleteCompletedDownloads = true;
             autoDownloadReadChapters = true;
+            autoDownloadNextChapter = true;
             darkModeEnabled = false;
         }
     }
