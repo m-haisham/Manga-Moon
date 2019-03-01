@@ -8,6 +8,8 @@ using System.Windows.Input;
 using System.Windows.Controls;
 using MaterialDesignThemes.Wpf;
 using System.Windows;
+using System.IO;
+using HtmlAgilityPack;
 
 namespace Mago
 {
@@ -20,6 +22,9 @@ namespace Mago
         private PackIconKind _playPackIcon = PackIconKind.Play;
         private bool _allItemsSelected;
         private Visibility _visible = Visibility.Collapsed;
+
+        private MainViewModel MainView;
+        private bool isDownloading = false;
 
         #endregion
 
@@ -37,13 +42,14 @@ namespace Mago
         #endregion
 
         #region Constructor
-        public DownloadsPanelViewModel()
+        public DownloadsPanelViewModel(MainViewModel Main)
         {
-            _DownloadsPanel = Setup();
+            _DownloadsPanel = new ObservableCollection<DownloadProgressViewModel>();
             ClearCommand = new RelayCommand(ClearSelected);
             CleanCommand = new RelayCommand(Clean);
             TogglePlayCommand = new RelayCommand(TogglePlay);
 
+            MainView = Main;
 
             DownloadsPanelAnimation = new RelayCommand(() => IncrementDownloadsPanelIndex());
             
@@ -151,6 +157,17 @@ namespace Mago
             element2 = backup;
         }
 
+        private List<byte[]> LoadPaths(List<string> paths)
+        {
+            List<byte[]> newArray = new List<byte[]>();
+            for (int i = 0; i < paths.Count; i++)
+            {
+                if(File.Exists(paths[i]))
+                    newArray.Add(File.ReadAllBytes(paths[i]));
+            }
+            return newArray;
+        } 
+
         #endregion
         
         private ObservableCollection<DownloadProgressViewModel> Setup()
@@ -172,22 +189,160 @@ namespace Mago
             return obj;
         }
 
-        private void AddDownload(string _header, string _description, int Maximum)
+        public void AddDownload(string url, string chapterName, string mangaName)
         {
+            Application.Current.Dispatcher.Invoke(() =>
             _DownloadsPanel.Add(
                 new DownloadProgressViewModel
                 {
-                    Header = _header,
-                    Description = _description,
+                    Header = mangaName,
+                    Description = chapterName,
+                    url = url,
                     Progress = 0,
-                    Maximum = Maximum,
                     DownloadState = DownloadState.Queued
-                });
+                }));
 
-            if(_DownloadsPanel.Count == 1 && _playPackIcon != PackIconKind.Pause)
+            if(_DownloadsPanel.Where(n => n.DownloadState == DownloadState.Queued).Count() == 1 && !isDownloading)
             {
-                //StartDownload
+                Task.Run(DownloadAsync);
             }
+        }
+
+        private async Task DownloadAsync()
+        {
+            isDownloading = true;
+
+            while(_DownloadsPanel.Count > 0)
+            {
+                //get first Queued in list
+                DownloadProgressViewModel item = null;
+                for (int i = 0; i < _DownloadsPanel.Count; i++)
+                {
+                    if(_DownloadsPanel[i].DownloadState == DownloadState.Queued)
+                    {
+                        item = _DownloadsPanel[i];
+                        break;
+                    }
+                }
+
+                //if no items queued
+                if (item == null) {isDownloading = false; return; }
+                
+                //if download state is wait
+                while (PlayPackIcon == PackIconKind.Play)
+                    await Task.Delay(1000);
+
+                //get all page paths of chapter
+                List<string> pagePaths = await GetPagePaths(item.url);
+
+                //set progress bar end
+                item.Maximum = pagePaths.Count;
+                
+                //Change download State
+                item.DownloadState = DownloadState.InProgress;
+
+                //download all undownloaded files
+                for (int i = 0; i < pagePaths.Count; i++)
+                {
+                    //if download state is wait
+                    while (PlayPackIcon == PackIconKind.Play)
+                        await Task.Delay(1000);
+
+                    if (!(item.tempPaths.Count >= i + 1 && item.tempPaths[i] != null))
+                    {
+                        //Download data to a byte array
+                        byte[] array = DataConversionHelper.DownloadToArray(pagePaths[i]);
+
+                        //Save to a temporary file
+                        string path = SaveByteArrayToTempFile(array);
+
+                        //Remember path
+                        item.tempPaths.Add(path);
+                    }
+
+                    //advance download progress
+                    item.Progress += 1;
+
+                }
+
+                //Create new ch class
+                ChSave chSave = new ChSave(LoadPaths(item.tempPaths));
+
+                //create path for download
+                string savePath = MainView.Settings.mangaPath + item.Header + "/" + item.Description.Replace(" ", "_") + ".ch";
+
+                //Save file to path
+                SaveSystem.SaveBinary(chSave, savePath);
+
+                //dispose of save class
+                chSave = null;
+
+                //Set download status to complete
+                item.DownloadState = DownloadState.Completed;
+
+                //notify user according to settings
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (MainView.Settings.chapterDownloadNotifications)
+                        MainView.NotificationsViewModel.AddNotification(item.Header + ": " + item.Description + " Download Complete.", NotificationMode.Success);
+                    if (MainView.Settings.autoDeleteCompletedDownloads)
+                        DownloadsPanel.Remove(item);
+                });
+                
+            }
+            
+            isDownloading = false;
+            if(MainView.Settings.downloadTaskNotifications)
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MainView.NotificationsViewModel.AddNotification("Download Task complete.", NotificationMode.Normal);
+            });
+        }
+
+        public async Task<List<string>> GetPagePaths(string ChapterPath)
+        {
+            //get all links of pages
+            List<string> pagePaths = new List<string>();
+
+            HtmlWeb web = new HtmlWeb();
+            HtmlDocument doc = web.Load(ChapterPath);
+
+            //get division with id "vungdoc"
+            HtmlNode idNode = doc.GetElementbyId("vungdoc");
+
+            //get all img nodes
+            IEnumerable<HtmlNode> RawPageList = idNode.Descendants("img");
+            for (int i = 0; i < RawPageList.Count(); i++)
+            {
+                HtmlNode pageNode = RawPageList.ElementAt(i);
+
+                //get value of attribute source
+                string url = pageNode.Attributes["src"].Value;
+
+                //add value of type url to page list
+                pagePaths.Add(url);
+            }
+
+            //return paths
+            return pagePaths;
+        }
+
+        public string SaveByteArrayToTempFile(byte[] array)
+        {
+            //get temporary file path
+            string tempPath = Path.GetTempFileName();
+
+            //create temporary file
+            FileStream stream = new FileStream(tempPath, FileMode.Create);
+
+            //write byteArray to file to file
+            stream.Write(array, 0, array.Count());
+
+            //close filestream
+            stream.Close();
+
+            //return file path
+            return tempPath;
         }
 
         public ObservableCollection<DownloadProgressViewModel> DownloadsPanel => _DownloadsPanel;

@@ -1,20 +1,541 @@
-﻿<Application x:Class="Mago.App"
+﻿<Application
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Mago"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:Converters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf" xmlns:ControlzEx="clr-namespace:ControlzEx;assembly=MaterialDesignThemes.Wpf" x:Class="Mago.App"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+
+                <!-- MahApps.Metro resource dictionaries. Make sure that all file names are Case Sensitive! -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+
+                <!-- Accent and AppTheme setting -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Cobalt.xaml" />
+
+                <!-- theme resource -->
+                <!-- change "BaseLight" to the theme you want -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Primary/MaterialDesignColor.Blue.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Green.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignColors;component/Themes/Recommended/Accent/MaterialDesignColor.Lime.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PopupBox.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ComboBox.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.TextBlock.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Menu.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ProgressBar.xaml" />
+
+                <!--Metro Controls-->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="FlatExpander" TargetType="{x:Type Expander}">
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+                <Setter Property="Foreground" Value="{Binding (TextElement.Foreground), RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type FrameworkElement}}}"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="VerticalContentAlignment" Value="Top"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Expander}">
+                            <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="ExpansionStates">
+                                        <VisualStateGroup.Transitions>
+                                            <VisualTransition From="{x:Null}" GeneratedDuration="0" To="Expanded">
+                                                <VisualTransition.GeneratedEasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </VisualTransition.GeneratedEasingFunction>
+                                                <Storyboard>
+                                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Storyboard.TargetName="PART_Content">
+                                                        <DiscreteObjectKeyFrame KeyTime="0">
+                                                            <DiscreteObjectKeyFrame.Value>
+                                                                <Visibility>Visible</Visibility>
+                                                            </DiscreteObjectKeyFrame.Value>
+                                                        </DiscreteObjectKeyFrame>
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                    <DoubleAnimation Duration="0:0:0.3" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="PART_Content"/>
+                                                </Storyboard>
+                                            </VisualTransition>
+                                            <VisualTransition From="{x:Null}" GeneratedDuration="0" To="Collapsed">
+                                                <VisualTransition.GeneratedEasingFunction>
+                                                    <CubicEase EasingMode="EaseOut"/>
+                                                </VisualTransition.GeneratedEasingFunction>
+                                                <Storyboard>
+                                                    <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Storyboard.TargetName="PART_Content">
+                                                        <DiscreteObjectKeyFrame KeyTime="0:0:0.3">
+                                                            <DiscreteObjectKeyFrame.Value>
+                                                                <Visibility>Collapsed</Visibility>
+                                                            </DiscreteObjectKeyFrame.Value>
+                                                        </DiscreteObjectKeyFrame>
+                                                    </ObjectAnimationUsingKeyFrames>
+                                                    <DoubleAnimation Duration="0:0:0.3" To="0" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="PART_Content"/>
+                                                </Storyboard>
+                                            </VisualTransition>
+                                        </VisualStateGroup.Transitions>
+                                        <VisualState x:Name="Expanded">
+                                            <Storyboard>
+                                                <DoubleAnimation Duration="0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="PART_Content"/>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Storyboard.TargetName="PART_Content">
+                                                    <DiscreteObjectKeyFrame KeyTime="0">
+                                                        <DiscreteObjectKeyFrame.Value>
+                                                            <Visibility>Visible</Visibility>
+                                                        </DiscreteObjectKeyFrame.Value>
+                                                    </DiscreteObjectKeyFrame>
+                                                </ObjectAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Collapsed">
+                                            <Storyboard>
+                                                <DoubleAnimation Duration="0" To="0" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="PART_Content"/>
+                                                <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Visibility" Storyboard.TargetName="PART_Content">
+                                                    <DiscreteObjectKeyFrame KeyTime="0">
+                                                        <DiscreteObjectKeyFrame.Value>
+                                                            <Visibility>Hidden</Visibility>
+                                                        </DiscreteObjectKeyFrame.Value>
+                                                    </DiscreteObjectKeyFrame>
+                                                </ObjectAnimationUsingKeyFrames>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <DockPanel Background="{TemplateBinding Background}">
+                                    <ToggleButton x:Name="HeaderSite" BorderThickness="0" Cursor="Hand" ContentTemplate="{TemplateBinding HeaderTemplate}" Content="{TemplateBinding Header}" ContentStringFormat="{TemplateBinding HeaderStringFormat}" DockPanel.Dock="Top" Foreground="{TemplateBinding Foreground}" Focusable="False" FontSize="15" IsTabStop="False" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Opacity="0.87">
+                                        <ToggleButton.Style>
+                                            <Style TargetType="{x:Type ToggleButton}">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                            <Border Background="{TemplateBinding Background}" Padding="5">
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <ContentPresenter ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" VerticalAlignment="Center"/>
+                                                                </Grid>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ToggleButton.Style>
+                                    </ToggleButton>
+                                    <Border x:Name="ContentSite" DockPanel.Dock="Bottom">
+                                        <StackPanel x:Name="ContentPanel" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}">
+                                            <StackPanel.Height>
+                                                <MultiBinding UpdateSourceTrigger="Default">
+                                                    <MultiBinding.Converter>
+                                                        <Converters:MathMultipleConverter Operation="Multiply"/>
+                                                    </MultiBinding.Converter>
+                                                    <Binding ElementName="PART_Content" Path="ActualHeight"/>
+                                                    <Binding ElementName="PART_Content" Path="Opacity"/>
+                                                </MultiBinding>
+                                            </StackPanel.Height>
+                                            <StackPanel.Width>
+                                                <MultiBinding UpdateSourceTrigger="Default">
+                                                    <MultiBinding.Converter>
+                                                        <Converters:MathMultipleConverter Operation="Multiply"/>
+                                                    </MultiBinding.Converter>
+                                                    <Binding ElementName="PART_Content" Path="ActualWidth"/>
+                                                    <Binding ElementName="PART_Content" Path="Opacity"/>
+                                                </MultiBinding>
+                                            </StackPanel.Width>
+                                            <ContentPresenter x:Name="PART_Content" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" Focusable="False"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DockPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="ExpandDirection" Value="Right">
+                                    <Setter Property="DockPanel.Dock" TargetName="HeaderSite" Value="Left"/>
+                                    <Setter Property="DockPanel.Dock" TargetName="ContentSite" Value="Right"/>
+                                    <Setter Property="Orientation" TargetName="ContentPanel" Value="Horizontal"/>
+                                    <Setter Property="Height" TargetName="ContentPanel" Value="Auto"/>
+                                </Trigger>
+                                <Trigger Property="ExpandDirection" Value="Left">
+                                    <Setter Property="DockPanel.Dock" TargetName="HeaderSite" Value="Right"/>
+                                    <Setter Property="DockPanel.Dock" TargetName="ContentSite" Value="Left"/>
+                                    <Setter Property="Orientation" TargetName="ContentPanel" Value="Horizontal"/>
+                                    <Setter Property="Height" TargetName="ContentPanel" Value="Auto"/>
+                                    <Setter Property="Style" TargetName="HeaderSite">
+                                        <Setter.Value>
+                                            <Style TargetType="{x:Type ToggleButton}">
+                                                <Setter Property="Background" Value="Transparent"/>
+                                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                                <Setter Property="VerticalAlignment" Value="Stretch"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                            <Border Background="{TemplateBinding Background}" Padding="5">
+                                                                <Grid>
+                                                                    <Grid.RowDefinitions>
+                                                                        <RowDefinition Height="Auto"/>
+                                                                        <RowDefinition/>
+                                                                    </Grid.RowDefinitions>
+                                                                    <ToggleButton Foreground="{TemplateBinding Foreground}" HorizontalAlignment="Center" IsChecked="{Binding IsChecked, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Grid.Row="0" RenderTransformOrigin="0.5,0.5">
+                                                                        <ToggleButton.RenderTransform>
+                                                                            <RotateTransform Angle="90"/>
+                                                                        </ToggleButton.RenderTransform>
+                                                                        <ToggleButton.Style>
+                                                                            <Style TargetType="{x:Type ToggleButton}">
+                                                                                <Setter Property="Template">
+                                                                                    <Setter.Value>
+                                                                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                                                            <Border Background="Transparent"/>
+                                                                                        </ControlTemplate>
+                                                                                    </Setter.Value>
+                                                                                </Setter>
+                                                                            </Style>
+                                                                        </ToggleButton.Style>
+                                                                    </ToggleButton>
+                                                                    <ContentPresenter Content="{TemplateBinding Content}" HorizontalAlignment="Center" Margin="0,16,0,0" Grid.Row="1" VerticalAlignment="Top"/>
+                                                                </Grid>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Trigger>
+                                <Trigger Property="ExpandDirection" Value="Up">
+                                    <Setter Property="DockPanel.Dock" TargetName="HeaderSite" Value="Bottom"/>
+                                    <Setter Property="DockPanel.Dock" TargetName="ContentSite" Value="Top"/>
+                                    <Setter Property="Orientation" TargetName="ContentPanel" Value="Vertical"/>
+                                    <Setter Property="Width" TargetName="ContentPanel" Value="Auto"/>
+                                </Trigger>
+                                <Trigger Property="ExpandDirection" Value="Down">
+                                    <Setter Property="DockPanel.Dock" TargetName="HeaderSite" Value="Top"/>
+                                    <Setter Property="DockPanel.Dock" TargetName="ContentSite" Value="Bottom"/>
+                                    <Setter Property="Orientation" TargetName="ContentPanel" Value="Vertical"/>
+                                    <Setter Property="Width" TargetName="ContentPanel" Value="Auto"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="Custom1" TargetType="materialDesign:ColorZone">
+                <Setter Property="Opacity" Value=".5"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=IsMouseOver}" Value="True">
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard >
+                                    <DoubleAnimation Duration="0:0:.2" To="1" 
+                                    Storyboard.TargetProperty="Opacity"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                        <DataTrigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard >
+                                    <DoubleAnimation Duration="0:0:.2" To=".5" 
+                                     Storyboard.TargetProperty="Opacity"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.ExitActions>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Path=IsMouseOver, ElementName=circle}" Value="True">
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard >
+                                    <DoubleAnimation Duration="0:0:.2" To=".5" 
+                                    Storyboard.TargetProperty="Opacity"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                        <DataTrigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard >
+                                    <DoubleAnimation Duration="0:0:.2" To="1" 
+                                      Storyboard.TargetProperty="Opacity"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.ExitActions>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="CustomDesignReaderPopupBox" TargetType="{x:Type materialDesign:PopupBox}">
+                <Setter Property="ToggleContent">
+                    <Setter.Value>
+                        <materialDesign:PackIcon Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type materialDesign:PopupBox}}}" Height="24" Kind="EllipsisVertical" Margin="4,0" Width="24"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource MaterialDesignFlatButtonRipple}"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="materialDesign:ShadowAssist.ShadowDepth" Value="Depth3"/>
+                <Setter Property="FontWeight" Value="Normal"/>
+                <Setter Property="Padding" Value="0,8"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type materialDesign:PopupBox}">
+                            <ControlTemplate.Resources>
+                                <Style x:Key="ToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                <materialDesign:Ripple ClipToBounds="False" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" Focusable="False" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" materialDesign:RippleAssist.IsCentered="True" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                <Style x:Key="{x:Type Separator}" TargetType="{x:Type Separator}">
+                                    <Style.BasedOn>
+                                        <Style TargetType="{x:Type Separator}">
+                                            <Setter Property="Background" Value="{DynamicResource MaterialDesignSelection}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignSelection}"/>
+                                            <Setter Property="MinHeight" Value="1"/>
+                                            <Setter Property="SnapsToDevicePixels" Value="True"/>
+                                            <Setter Property="Height" Value="16"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Separator}">
+                                                        <Rectangle Fill="{TemplateBinding Background}" HorizontalAlignment="Stretch" Height="1" VerticalAlignment="Center"/>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Style.BasedOn>
+                                </Style>
+                            </ControlTemplate.Resources>
+                            <Grid>
+                                <ToggleButton x:Name="PART_Toggle" Cursor="Hand" ContentTemplate="{TemplateBinding ToggleContentTemplate}" Content="{TemplateBinding ToggleContent}" IsChecked="{Binding IsPopupOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" VerticalAlignment="Center">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="{x:Type ToggleButton}">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                        <materialDesign:Ripple ClipToBounds="False" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" Focusable="False" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" materialDesign:RippleAssist.IsCentered="True" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Foreground" Value="WhiteSmoke"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="False">
+                                                    <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkBrush}"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                </ToggleButton>
+                                <ControlzEx:PopupEx x:Name="PART_Popup" AllowsTransparency="True" CustomPopupPlacementCallback="{Binding PopupPlacementMethod, RelativeSource={RelativeSource TemplatedParent}}" HorizontalOffset="5" IsOpen="{Binding IsPopupOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="Fade" Placement="Custom" VerticalOffset="5">
+                                    <materialDesign:Card ContentTemplate="{TemplateBinding PopupContentTemplate}" Content="{TemplateBinding PopupContent}" RenderOptions.ClearTypeHint="Enabled" Foreground="{DynamicResource MaterialDesignBody}" FontWeight="Normal" FontSize="15" Margin="5" Padding="{TemplateBinding Padding}">
+                                        <materialDesign:Card.Resources>
+                                            <Style x:Key="{x:Type Button}" TargetType="{x:Type Button}">
+                                                <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                                <Setter Property="Padding" Value="16,0,16,16"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Grid>
+                                                                <VisualStateManager.VisualStateGroups>
+                                                                    <VisualStateGroup x:Name="CommonStates">
+                                                                        <VisualStateGroup.Transitions>
+                                                                            <VisualTransition From="{x:Null}" GeneratedDuration="0:0:0.3" Storyboard="{x:Null}" To="Normal">
+                                                                                <VisualTransition.GeneratedEasingFunction>
+                                                                                    <CircleEase EasingMode="EaseOut"/>
+                                                                                </VisualTransition.GeneratedEasingFunction>
+                                                                            </VisualTransition>
+                                                                        </VisualStateGroup.Transitions>
+                                                                        <VisualState x:Name="Normal"/>
+                                                                        <VisualState x:Name="MouseOver">
+                                                                            <Storyboard>
+                                                                                <DoubleAnimation Duration="0" To="0.1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="MouseOverBorder"/>
+                                                                            </Storyboard>
+                                                                        </VisualState>
+                                                                        <VisualState x:Name="Disabled">
+                                                                            <Storyboard>
+                                                                                <DoubleAnimation Duration="0" To="0.48" Storyboard.TargetProperty="Opacity"/>
+                                                                            </Storyboard>
+                                                                        </VisualState>
+                                                                    </VisualStateGroup>
+                                                                </VisualStateManager.VisualStateGroups>
+                                                                <Border x:Name="MouseOverBorder" Opacity="0">
+                                                                    <Border.Background>
+                                                                        <TemplateBinding Property="Foreground">
+                                                                            <TemplateBinding.Converter>
+                                                                                <Converters:BrushRoundConverter HighValue="White" LowValue="Black"/>
+                                                                            </TemplateBinding.Converter>
+                                                                        </TemplateBinding>
+                                                                    </Border.Background>
+                                                                </Border>
+                                                                <materialDesign:Ripple ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" Focusable="False" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" MinHeight="48" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}">
+                                                                    <materialDesign:Ripple.Feedback>
+                                                                        <TemplateBinding Property="Foreground">
+                                                                            <TemplateBinding.Converter>
+                                                                                <Converters:BrushRoundConverter HighValue="White" LowValue="Black"/>
+                                                                            </TemplateBinding.Converter>
+                                                                        </TemplateBinding>
+                                                                    </materialDesign:Ripple.Feedback>
+                                                                </materialDesign:Ripple>
+                                                            </Grid>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </materialDesign:Card.Resources>
+                                    </materialDesign:Card>
+                                </ControlzEx:PopupEx>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.23"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="CustomDesignTitleBarPopupBox" TargetType="{x:Type materialDesign:PopupBox}">
+                <Setter Property="ToggleContent">
+                    <Setter.Value>
+                        <materialDesign:PackIcon Foreground="{Binding Foreground, RelativeSource={RelativeSource FindAncestor, AncestorLevel=1, AncestorType={x:Type materialDesign:PopupBox}}}" Height="24" Kind="EllipsisVertical" Margin="4,0" Width="24"/>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="materialDesign:RippleAssist.Feedback" Value="{DynamicResource MaterialDesignFlatButtonRipple}"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="materialDesign:ShadowAssist.ShadowDepth" Value="Depth3"/>
+                <Setter Property="FontWeight" Value="Normal"/>
+                <Setter Property="Padding" Value="0,8"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type materialDesign:PopupBox}">
+                            <ControlTemplate.Resources>
+                                <Style x:Key="ToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                <materialDesign:Ripple ClipToBounds="False" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" Focusable="False" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" materialDesign:RippleAssist.IsCentered="True" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                <Style x:Key="{x:Type Separator}" TargetType="{x:Type Separator}">
+                                    <Style.BasedOn>
+                                        <Style TargetType="{x:Type Separator}">
+                                            <Setter Property="Background" Value="{DynamicResource MaterialDesignSelection}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignSelection}"/>
+                                            <Setter Property="MinHeight" Value="1"/>
+                                            <Setter Property="SnapsToDevicePixels" Value="True"/>
+                                            <Setter Property="Height" Value="16"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Separator}">
+                                                        <Rectangle Fill="{TemplateBinding Background}" HorizontalAlignment="Stretch" Height="1" VerticalAlignment="Center"/>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Style.BasedOn>
+                                </Style>
+                            </ControlTemplate.Resources>
+                            <Grid>
+                                <ToggleButton x:Name="PART_Toggle" Cursor="Hand" ContentTemplate="{TemplateBinding ToggleContentTemplate}" Content="{TemplateBinding ToggleContent}" IsChecked="{Binding IsPopupOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" VerticalAlignment="Center">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="{x:Type ToggleButton}">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                                        <materialDesign:Ripple ClipToBounds="False" ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" Focusable="False" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" materialDesign:RippleAssist.IsCentered="True" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource GrayBrush10}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="False">
+                                                    <Setter Property="Foreground" Value="#98B8F8"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                </ToggleButton>
+                                <ControlzEx:PopupEx x:Name="PART_Popup" AllowsTransparency="True" CustomPopupPlacementCallback="{Binding PopupPlacementMethod, RelativeSource={RelativeSource TemplatedParent}}" HorizontalOffset="5" IsOpen="{Binding IsPopupOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="Fade" Placement="Custom" VerticalOffset="5">
+                                    <materialDesign:Card ContentTemplate="{TemplateBinding PopupContentTemplate}" Content="{TemplateBinding PopupContent}" RenderOptions.ClearTypeHint="Enabled" Foreground="{DynamicResource MaterialDesignBody}" FontWeight="Normal" FontSize="15" Margin="5" Padding="{TemplateBinding Padding}">
+                                        <materialDesign:Card.Resources>
+                                            <Style x:Key="{x:Type Button}" TargetType="{x:Type Button}">
+                                                <Setter Property="VerticalContentAlignment" Value="Bottom"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                                <Setter Property="Padding" Value="16,0,16,16"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Grid>
+                                                                <VisualStateManager.VisualStateGroups>
+                                                                    <VisualStateGroup x:Name="CommonStates">
+                                                                        <VisualStateGroup.Transitions>
+                                                                            <VisualTransition From="{x:Null}" GeneratedDuration="0:0:0.3" Storyboard="{x:Null}" To="Normal">
+                                                                                <VisualTransition.GeneratedEasingFunction>
+                                                                                    <CircleEase EasingMode="EaseOut"/>
+                                                                                </VisualTransition.GeneratedEasingFunction>
+                                                                            </VisualTransition>
+                                                                        </VisualStateGroup.Transitions>
+                                                                        <VisualState x:Name="Normal"/>
+                                                                        <VisualState x:Name="MouseOver">
+                                                                            <Storyboard>
+                                                                                <DoubleAnimation Duration="0" To="0.1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="MouseOverBorder"/>
+                                                                            </Storyboard>
+                                                                        </VisualState>
+                                                                        <VisualState x:Name="Disabled">
+                                                                            <Storyboard>
+                                                                                <DoubleAnimation Duration="0" To="0.48" Storyboard.TargetProperty="Opacity"/>
+                                                                            </Storyboard>
+                                                                        </VisualState>
+                                                                    </VisualStateGroup>
+                                                                </VisualStateManager.VisualStateGroups>
+                                                                <Border x:Name="MouseOverBorder" Opacity="0">
+                                                                    <Border.Background>
+                                                                        <TemplateBinding Property="Foreground">
+                                                                            <TemplateBinding.Converter>
+                                                                                <Converters:BrushRoundConverter HighValue="White" LowValue="Black"/>
+                                                                            </TemplateBinding.Converter>
+                                                                        </TemplateBinding>
+                                                                    </Border.Background>
+                                                                </Border>
+                                                                <materialDesign:Ripple ContentTemplate="{TemplateBinding ContentTemplate}" Content="{TemplateBinding Content}" Focusable="False" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" MinHeight="48" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}">
+                                                                    <materialDesign:Ripple.Feedback>
+                                                                        <TemplateBinding Property="Foreground">
+                                                                            <TemplateBinding.Converter>
+                                                                                <Converters:BrushRoundConverter HighValue="White" LowValue="Black"/>
+                                                                            </TemplateBinding.Converter>
+                                                                        </TemplateBinding>
+                                                                    </materialDesign:Ripple.Feedback>
+                                                                </materialDesign:Ripple>
+                                                            </Grid>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </materialDesign:Card.Resources>
+                                    </materialDesign:Card>
+                                </ControlzEx:PopupEx>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.23"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

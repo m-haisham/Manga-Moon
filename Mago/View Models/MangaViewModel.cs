@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace Mago
 {
@@ -31,60 +34,57 @@ namespace Mago
 
         public ICommand DownloadSelected { get; set; }
 
-        private MainViewModel MainView;
+        public MainViewModel MainView;
+        private string mangaSavePath;
+        private MgiSave savedinfo;
 
         public MangaViewModel(MainViewModel mainView)
         {
             MainView = mainView;
-            DownloadSelected = new RelayCommand(DownloadMultiple);
-            Setup();
+            DownloadSelected = new RelayCommand(() => Task.Run(DownloadMultiple));
+
+            GenreList = new ObservableCollection<GenreItemViewModel>();
+            AuthorList = new ObservableCollection<string>();
+            ChapterList = new ObservableCollection<ChapterListItemViewModel>();
+            
         }
 
-        private void DownloadMultiple()
+        private async Task DownloadMultiple()
         {
             List<int> SelectedIndexList = new List<int>();
             for (int i = 0; i < ChapterList.Count; i++)
             {
-                if (ChapterList[i].IsSelected)
+                if (ChapterList[i].IsSelected && ChapterList[i].IsNotDownloaded == true)
                     SelectedIndexList.Add(i);
             }
+            SelectedIndexList.Reverse();
+
             foreach (var index in SelectedIndexList)
             {
+                AddtoDownloads(ChapterList[index]);
                 ChapterList[index].IsNotDownloaded = false;
             }
         }
 
-        private void Setup()
+        public void AddtoDownloads(ChapterListItemViewModel chapter)
         {
-            ObservableCollection<ChapterListItemViewModel> listChapter = new ObservableCollection<ChapterListItemViewModel>();
-            for (int i = 0; i < 20; i++)
+            if (mangaSavePath == null)
             {
-                listChapter.Add(new ChapterListItemViewModel(this, i)
-                {
-                    Name = "chapter " + (i + 1).ToString(),
-                    IsRead = false,
-                    IsSelected = false,
-                    IsNotDownloaded = true
-                });
+                SetMangaPath();
+                SaveMangaInfo();
             }
-
-            _chapterList = listChapter;
-
-            _genreList = new ObservableCollection<GenreItemViewModel>
+            else if(savedinfo?.chapters.Count != ChapterList.Count)
             {
-                new GenreItemViewModel { Text = "Action" },
-                new GenreItemViewModel { Text = "Adventure" },
-                new GenreItemViewModel { Text = "Drama" },
-                new GenreItemViewModel { Text = "Fantasy" },
-                new GenreItemViewModel { Text = "Tragedy" }
-            };
-
-            _authorList = new ObservableCollection<string> { "Sakamoto 666", "Mizukiyoshi Juro" };
+                SaveMangaInfo();
+            }
+            MainView.DownloadsPanelViewModel.AddDownload(chapter.URL, chapter.Name, Name);
         }
 
         public async Task OpenInReader(int index)
         {
+            MainView.ReaderViewModel.MangaName = Name;
             MainView.ReaderViewModel.SetURL(Url);
+            MainView.ReaderViewModel.mangaSavePath = mangaSavePath;
 
             await MainView.ReaderViewModel.Setup(_chapterList.Count - index - 1);
 
@@ -103,6 +103,90 @@ namespace Mago
         {
             WebClient wb = new WebClient();
             return wb.DownloadData(url);
+        }
+
+        public void SetMangaPath()
+        {
+            mangaSavePath = MainView.Settings.mangaPath + Name + "/" + Name + ".mgi";
+            if(File.Exists(mangaSavePath))
+                savedinfo = SaveSystem.LoadBinary<MgiSave>(mangaSavePath);
+        }
+
+        public void SaveMangaInfo()
+        {
+            MgiSave instance = new MgiSave
+            {
+                url = Url,
+                name = _name,
+                description = _description,
+                image = ImageSource.ToByteArray(),
+                isFavourite = _isFavourite,
+                isCompleted = _isCompleted,
+                authors = _authorList
+            };
+            
+
+            for (int i = 0; i < _genreList.Count; i++)
+                instance.genres.Add(_genreList[i].Text);
+
+            for (int i = 0; i < _chapterList.Count; i++)
+            {
+                instance.chapters.Add(_chapterList[i].Name);
+                instance.chapterUrls.Add(_chapterList[i].URL);
+            }
+
+            SaveSystem.SaveBinary(instance, mangaSavePath);
+        }
+
+        public void ImportMangaInfo()
+        {
+            Url = savedinfo.url;
+            Name = savedinfo.name;
+            Description = savedinfo.description;
+            ImageSource = savedinfo.image?.ToFreezedBitmapImage();
+            IsFavourite = savedinfo.isFavourite;
+            IsCompleted = savedinfo.isCompleted;
+
+            Dispatcher dispatcher;
+            if (Dispatcher.CurrentDispatcher != Application.Current.Dispatcher)
+                dispatcher = Application.Current.Dispatcher;
+            else
+                dispatcher = Dispatcher.CurrentDispatcher;
+
+            dispatcher.Invoke(() =>
+            {
+                AuthorList = savedinfo.authors;
+
+                GenreList.Clear();
+                for (int i = 0; i < savedinfo.genres.Count; i++)
+                {
+                    GenreList.Add(new GenreItemViewModel { Text = savedinfo.genres[i] });
+                }
+
+                ChapterList.Clear();
+                for (int i = 0; i < savedinfo.chapters.Count; i++)
+                {
+                    ChapterListItemViewModel model = new ChapterListItemViewModel(this, i)
+                    {
+                        Name = savedinfo.chapters[i],
+                        URL = savedinfo.chapterUrls[i]
+                    };
+
+                    model.CheckIfDownloaded();
+
+                    ChapterList.Add(model);
+                }
+            });
+        }
+
+        public async Task LoadMangaInfo(string path)
+        {
+            mangaSavePath = path;
+            if (File.Exists(mangaSavePath))
+            {
+                savedinfo = SaveSystem.LoadBinary<MgiSave>(mangaSavePath);
+                ImportMangaInfo();
+            }
         }
 
         public void SetSelectors(ChapterListItemViewModel item)
@@ -195,6 +279,7 @@ namespace Mago
             {
                 if (_name == value) return;
                 _name = value;
+                SetMangaPath();
             }
         }
 

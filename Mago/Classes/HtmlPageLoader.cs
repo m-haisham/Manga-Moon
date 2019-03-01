@@ -3,10 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using HtmlAgilityPack;
 
@@ -16,6 +18,7 @@ namespace Mago
     {
         private string url;
         private MangaViewModel MangaView;
+        private MainViewModel MainView;
 
         private string _name;
         private string _status;
@@ -26,8 +29,9 @@ namespace Mago
         private ObservableCollection<GenreItemViewModel> _genreList;
         private ObservableCollection<string> _authorList;
 
-        public HtmlPageLoader(MangaViewModel mangaView)
+        public HtmlPageLoader(MainViewModel mainView, MangaViewModel mangaView)
         {
+            MainView = mainView;
             MangaView = mangaView;
         }
 
@@ -53,7 +57,7 @@ namespace Mago
             string imageSource = img.Attributes["src"].Value;
 
             //Get Status
-            string status = infonodes.ElementAt(2).InnerText.Substring(9); 
+            string status = infonodes.ElementAt(2).InnerText.Substring(9);
 
             //Get Authors
             ObservableCollection<string> authors = new ObservableCollection<string>();
@@ -74,7 +78,7 @@ namespace Mago
             }
 
             //Get Description
-            HtmlNodeCollection descriptionNodes =  doc.DocumentNode.SelectNodes("//div[@id='noidungm']/text()");
+            HtmlNodeCollection descriptionNodes = doc.DocumentNode.SelectNodes("//div[@id='noidungm']/text()");
 
             StringBuilder sb = new StringBuilder();
 
@@ -109,7 +113,7 @@ namespace Mago
             _status = status;
             _image = imageSource.ToFreezedBitmapImage();
             _description = description;
-            
+
             _authorList = authors;
 
             _genreList = new ObservableCollection<GenreItemViewModel>();
@@ -122,7 +126,7 @@ namespace Mago
             }
 
             _chapterList = new ObservableCollection<ChapterListItemViewModel>();
-            for(int i = 0; i < chapters.Count; i++)
+            for (int i = 0; i < chapters.Count; i++)
             {
                 _chapterList.Add(
                     new ChapterListItemViewModel(MangaView, i)
@@ -226,30 +230,36 @@ namespace Mago
             _chapterList = new ObservableCollection<ChapterListItemViewModel>();
             for (int i = 0; i < chapters.Count; i++)
             {
-                _chapterList.Add(
-                    new ChapterListItemViewModel(MangaView, i)
-                    {
-                        Name = chapters[i].Name,
-                        URL = chapters[i].href,
-                        IsNotDownloaded = true
-                    }
-                );
+                ChapterListItemViewModel model = new ChapterListItemViewModel(MangaView, i)
+                {
+                    Name = chapters[i].Name,
+                    URL = chapters[i].href
+                };
+
+                model.CheckIfDownloaded();
+
+                _chapterList.Add(model);
             }
             #endregion
         }
 
-        public void ApplyData()
+        public async Task ApplyData()
         {
-            MangaView.Url = url; 
+            MangaView.Url = url;
 
             MangaView.Name = _name;
             MangaView.MangaStatus = _status;
             MangaView.ImageSource = _image;
             MangaView.Description = _description;
 
-            MangaView.ChapterList = _chapterList;
-            MangaView.GenreList = _genreList;
-            MangaView.AuthorList = _authorList;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MangaView.ChapterList = _chapterList;
+
+                MangaView.GenreList = _genreList;
+                MangaView.AuthorList = _authorList;
+            });
         }
+        
     }
 }

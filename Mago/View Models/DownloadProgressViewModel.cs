@@ -8,6 +8,9 @@ namespace Mago
 {
     public class DownloadProgressViewModel : BaseViewModel
     {
+        public string url;
+        public List<string> tempPaths;
+
         private DownloadState _DownloadState;
         private bool _isSelected;
         private string _header;
@@ -15,6 +18,11 @@ namespace Mago
         private string _code;
         private int _progress;
         private int _maximum;
+
+        public DownloadProgressViewModel()
+        {
+            tempPaths = new List<string>();
+        }
 
         public bool IsIndeterminate { get { return _DownloadState == DownloadState.Queued ? true : false; } }
 
@@ -60,7 +68,6 @@ namespace Mago
                 _description = value;
             }
         }
-        
 
         public string Code
         {

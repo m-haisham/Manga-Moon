@@ -1,4 +1,5 @@
-﻿using System.Windows.Media.Imaging;
+﻿using System;
+using System.Windows.Media.Imaging;
 
 namespace Mago
 {
@@ -15,7 +16,7 @@ namespace Mago
             _source = source;
             _width = Source.PixelWidth;
         }
-
+        
         public float Zoom
         {
             get { return _zoom; }

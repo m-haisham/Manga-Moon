@@ -35,6 +35,8 @@ namespace Mago
         public ICommand Favourites { get; set; }
         public ICommand Name { get; set; }
         public ICommand URL { get; set; }
+        public ICommand Reader { get; set; }
+        public ICommand Manga { get; set; }
 
         #endregion
 
@@ -42,7 +44,7 @@ namespace Mago
         {
             Parent = parent;
 
-            _darkThemeEnabled = Application.Current.Resources.MergedDictionaries[0].Source == darkTheme;
+            DarkThemeEnabled = Parent.Settings.darkModeEnabled;
 
             MinimizeCommand = new RelayCommand(Minimize);
             ShutdownCommand = new RelayCommand(Shutdown);
@@ -55,6 +57,8 @@ namespace Mago
             Favourites = new RelayCommand(OpenFavourites);
             Name = new RelayCommand(OpenByName);
             URL = new RelayCommand(OpenByURL);
+            Reader = new RelayCommand(OpenReader);
+            Manga = new RelayCommand(OpenInfoView);
         }
 
         public void OpenRecents()
@@ -119,6 +123,7 @@ namespace Mago
 
         private void Shutdown()
         {
+            SaveSystem.SaveSettings(Parent.Settings);
             Parent.ReaderViewModel.ClearTemporary();
             Application.Current.Shutdown();
         }
@@ -141,7 +146,6 @@ namespace Mago
                 if (_isMaximized == value) return;
                 _isMaximized = value;
                 Application.Current.MainWindow.WindowState = _isMaximized ? WindowState.Maximized : WindowState.Normal;
-
             }
         }
 
@@ -152,7 +156,9 @@ namespace Mago
             {
                 if (_darkThemeEnabled == value) return;
                 _darkThemeEnabled = value;
-                Application.Current.Resources.MergedDictionaries[0].Source = _darkThemeEnabled ? darkTheme : lightTheme;
+                Application.Current.Resources.MergedDictionaries[5].Source = _darkThemeEnabled ? darkTheme : lightTheme;
+                
+                Parent.Settings.darkModeEnabled = _darkThemeEnabled;
 
             }
         }

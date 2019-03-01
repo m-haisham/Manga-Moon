@@ -16,48 +16,60 @@ namespace Mago
     {
         private string _mangaName;
         private string _mangaURL;
+        private string _searchBox;
         private ObservableCollection<string> _suitableMangaSources;
         private int _selectedIndex = 0;
         private Visibility _warningIconVisibility = Visibility.Hidden;
         private bool _URLIsIndeternimate;
         private bool _URLButtonEnabled = true;
         private bool _NameIsIndeternimate;
-        private bool _NameButtonEnabled = true;
+        private bool _progressEnabled = false;
 
         private MainViewModel mainView;
         private HtmlPageLoader PageLoader;
 
         public ICommand FindByName { get; set; }
         public ICommand FindByURL { get; set; }
+        public ICommand FindCommand { get; set; }
 
         public FindByViewModel(MainViewModel mainViewModel, HtmlPageLoader pageLoader)
         {
             _suitableMangaSources = new ObservableCollection<string> { "Mangakakalot.com" };
 
-            FindByName = new RelayCommand(() => Task.Run(SearchWithName));
-            FindByURL = new RelayCommand(() => Task.Run(SearchWithURL));
+            //FindByName = new RelayCommand(() => Task.Run(SearchWithName));
+            //FindByURL = new RelayCommand(() => Task.Run(SearchWithURL));
+            FindCommand = new RelayCommand(Find);
 
             mainView = mainViewModel;
+
         }
 
-        async Task SearchWithName()
+        public void Find()
+        {
+            if (_searchBox == string.Empty) return;
+            ProgressEnabled = true;
+            if (_searchBox.StartsWith("https://"))
+                Task.Run(() => SearchWithURL(_searchBox));
+            else
+                Task.Run(() => SearchWithName(_searchBox));
+        }
+
+        async Task SearchWithName(string MangaName)
         {
             if (MangaName == null)
                 return;
-            NameIsIndeterminate = true;
             string url = ComposeURL(MangaName);
             bool isWebsiteValid = await RemoteFileExists(url);
             if (!isWebsiteValid) { NameIsIndeterminate = false; WarningIconVisibility = Visibility.Visible; return; }
             WarningIconVisibility = Visibility.Hidden;
             string n_url = url;
-            //OpenManga(n_url);
+            OpenManga(n_url);
         }
 
-        async Task SearchWithURL()
+        async Task SearchWithURL(string MangaURL)
         {
             if (MangaURL == null)
                 return;
-            URLIsIndeterminate = true;
             bool isWebsiteValid = await RemoteFileExists(MangaURL);
             if (!isWebsiteValid) { URLIsIndeterminate = false; WarningIconVisibility = Visibility.Visible; return; }
             WarningIconVisibility = Visibility.Hidden;
@@ -71,11 +83,13 @@ namespace Mago
             await mainView.HtmlPageLoader.LoadData(url);
 
             //apply the data
-            mainView.HtmlPageLoader.ApplyData();
+            await mainView.HtmlPageLoader.ApplyData();
 
             //clear button loading
-            NameIsIndeterminate = false;
-            URLIsIndeterminate = false;
+            ProgressEnabled = false;
+
+            //Clear search box text
+            SearchBox = string.Empty;
 
             //Set transitional index to Open Manga viewer
             mainView.MenuViewModel.TransitionIndex = mainView.MenuViewModel.page.MangaInfoView;
@@ -125,6 +139,15 @@ namespace Mago
                 _mangaURL = value;
             }
         }
+        public string SearchBox
+        {
+            get { return _searchBox; }
+            set
+            {
+                if (_searchBox == value) return;
+                _searchBox = value;
+            }
+        }
         public int SelectedIndex
         {
             get { return _selectedIndex; }
@@ -160,7 +183,6 @@ namespace Mago
             {
                 if (_NameIsIndeternimate == value) return;
                 _NameIsIndeternimate = value;
-                NameButtonEnabled = !_NameIsIndeternimate;
 
             }
         }
@@ -173,13 +195,13 @@ namespace Mago
                 _URLButtonEnabled = value;
             }
         }
-        public bool NameButtonEnabled
+        public bool ProgressEnabled
         {
-            get { return _NameButtonEnabled; }
+            get { return _progressEnabled; }
             set
             {
-                if (_NameButtonEnabled == value) return;
-                _NameButtonEnabled = value;
+                if (_progressEnabled == value) return;
+                _progressEnabled = value;
             }
         }
     }

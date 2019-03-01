@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using MaterialDesignThemes.Wpf;
 using System.IO;
+using System.Net;
 
 namespace Mago
 {
@@ -22,35 +23,49 @@ namespace Mago
         private ObservableCollection<int> _zoom;
         private ObservableCollection<int> _margin;
 
+        private string _mangaName;
+
         private bool _isTopBarOpen;
         private bool _nextChapterExists;
         private bool _lastChapterExists;
         private bool _ScrollTop;
 
         private int _selectedZoomIndex;
+        private float _zoomSlider;
         private int _selectedMarginIndex;
-        private int _selectedChapterIndex;
+        private int? _selectedChapterIndex = null;
+
+        private int _pagesDownloadValue;
+        private int _pageDownloadValue;
+        private int _pageCount;
+        private Visibility _checkVisibility;
 
         public ICommand LoadPrevious { get; set; }
         public ICommand LoadNext { get; set; }
 
         private string URL;
-
+        public string mangaSavePath;
+        private MainViewModel MainViewModel;
         private List<ChapterHolder> _chapters;
+
 
         TokenPool tokenPool = new TokenPool(5);
         Task lastDownloadTask;
         Task currentDownloadTask;
+        
+        List<byte[]> imageData;
 
-        public ReaderViewModel()
+        public ReaderViewModel(MainViewModel MainView)
         {
             _pages = new ObservableCollection<PageViewModel>();
             _zoom = new ObservableCollection<int> { 25, 50, 75, 100, 125, 150, 175, 200, 250, 300 };
             _margin = new ObservableCollection<int> { 0, 5 };
             SelectedMarginIndex = 1;
             SelectedZoomIndex = 3;
+            ZoomSlider = MainView.Settings.ReaderZoomPercent;
             LoadNext = new RelayCommand(AdvanceSelected);
             LoadPrevious = new RelayCommand(BackSelected);
+            MainViewModel = MainView;
         }
 
         public async Task Setup(int index)
@@ -76,6 +91,9 @@ namespace Mago
             }
             chapters = new ObservableCollection<ChapterInfo>(chapters.Reverse());
 
+            while (currentDownloadTask != null)
+                await Task.Delay(1000);
+
             //Call and Wait till main thread updates collection
             await Application.Current.Dispatcher.Invoke(async () => 
             {
@@ -96,54 +114,129 @@ namespace Mago
         {
             //wait till previous task is cancelled
             while (lastDownloadTask != null && lastDownloadTask.Status == TaskStatus.WaitingForActivation && !lastDownloadTask.IsCanceled)
+            {
                 Debug.WriteLine("Waiting for last task to cancel");
 
                 //wait for 25ms
                 await Task.Delay(25);
-            
-            //get current selected chapters url
-            string currentUrl = _chapters[index].url;
-
-            //get page paths
-            List<string> pagePaths = await GetPagePaths(currentUrl);
-
-            //Itereate through pages
-            for (int i = 0; i < pagePaths.Count; i++)
-            {
-                BitmapImage imageSource;
-
-                //if chapter already downloaded
-                if(_chapters[SelectedChapterIndex].imageTempPaths.Count >= i + 1 && _chapters[SelectedChapterIndex].imageTempPaths[i] != null)
-                {
-                    //load image from byte array on file
-                    imageSource = LoadBitmapFromArrayFile(_chapters[SelectedChapterIndex].imageTempPaths[i]);
-                }
-                else
-                {
-                    //Download the data to byte array
-                    byte[] byteArray = DataConversionHelper.DownloadToArray(pagePaths[i]);
-
-                    //save byte array to temporary file
-                    string tempPath = SaveByteArrayToTempFile(byteArray);
-
-                    //record temporary path
-                    _chapters[SelectedChapterIndex].imageTempPaths.Add(tempPath);
-                    
-                    //convert array to Bitmap
-                    imageSource = byteArray.ToFreezedBitmapImage();
-                }
-                
-                //check for cancellation before applying image
-                token.ThrowIfCancellationRequested();
-                
-                //Call main thread to add to collection
-                Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(imageSource); });
             }
+
+            CheckVisibility = Visibility.Hidden;
+
+            List<string> pagePaths;
+
+            //downloaded chapter path
+            string chapterPath = MainViewModel.Settings.mangaPath + MangaName + "/" + ChapterNames[index].Replace(' ', '_') + ".ch";
+
+            //if chapter hasn't been downloaded, download
+            if (!File.Exists(chapterPath))
+            {
+                //get current selected chapters url
+                string currentUrl = _chapters[index].url;
+
+                //get page paths
+                pagePaths = await GetPagePaths(currentUrl);
+
+                //set maximum of page downloads progress bar
+                PageCount = pagePaths.Count;
+
+                //reset downloaded value
+                PagesDownloadValue = 0;
+
+                //Itereate through pages
+                for (int i = 0; i < pagePaths.Count; i++)
+                {
+                    BitmapImage imageSource;
+
+                    //if chapter already downloaded
+                    if (_chapters[(int)SelectedChapterIndex].imageTempPaths.Count >= i + 1 && _chapters[(int)SelectedChapterIndex].imageTempPaths[i] != null)
+                    {
+                        //load image from byte array on file
+                        imageSource = LoadBitmapFromArrayFile(_chapters[(int)SelectedChapterIndex].imageTempPaths[i]);
+                    }
+                    else
+                    {
+
+                        WebClient web = new WebClient();
+                        web.DownloadProgressChanged += new DownloadProgressChangedEventHandler(client_DownloadProgressChanged);
+                        byte[] byteArray = await web.DownloadDataTaskAsync(pagePaths[i]);
+
+                        //Download the data to byte array
+                        //byte[] byteArray = DataConversionHelper.DownloadToArray(pagePaths[i]);
+
+                        //save byte array to temporary file
+                        string tempPath = SaveByteArrayToTempFile(byteArray);
+
+                        //record temporary path
+                        _chapters[(int)SelectedChapterIndex].imageTempPaths.Add(tempPath);
+
+                        //convert array to Bitmap
+                        imageSource = byteArray.ToFreezedBitmapImage();
+                    }
+
+                    //check for cancellation before applying image
+                    token.ThrowIfCancellationRequested();
+
+                    //Call main thread to add to collection
+                    Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(imageSource); });
+
+                    //append downloaded chapter value
+                    PagesDownloadValue += 1;
+                }
+
+                if (MainViewModel.Settings.autoDownloadReadChapters)
+                {
+                    if (!File.Exists(mangaSavePath))
+                    {
+                        MainViewModel.MangaViewModel.SaveMangaInfo();
+                    }
+
+                    //save the downloaded
+                    SaveChapter((int)SelectedChapterIndex, chapterPath);
+                }
+            }
+            else // read chapter from memory
+            {
+                //load data from chapter file
+                imageData = SaveSystem.LoadBinary<ChSave>(chapterPath).Images;
+
+                //set maximum of page downloads progress bar
+                PageCount = imageData.Count;
+
+                //reset downloaded value
+                PagesDownloadValue = 0;
+
+                //iterate through all data
+                for (int i = 0; i < imageData.Count; i++)
+                {
+                    //Create image from byte array
+                    BitmapImage image = imageData[i].ToFreezedBitmapImage();
+
+                    //Call main thread to add to collection
+                    Application.Current.Dispatcher.Invoke(() => { AddToReaderAsync(image); });
+
+                    //append downloaded chapter value
+                    PagesDownloadValue += 1;
+
+                }
+            }
+
+            //Rise notification according to settings
+            if (MainViewModel.Settings.chapterReaderLoadNotifications)
+                Application.Current.Dispatcher.Invoke(() => MainViewModel.NotificationsViewModel.AddNotification("Current chapter fully loaded", NotificationMode.Success));
+
+            CheckVisibility = Visibility.Visible;
 
             #region Download next chapter to temporary path
 
             //if next chapter doesnt exist exit method
-            if (!NextChapterExists) return;
+            if (!NextChapterExists || !MainViewModel.Settings.autoDownloadNextChapter) { currentDownloadTask = null; return; }
+
+            //Save path for Next chapter
+            string NextchapterPath = MainViewModel.Settings.mangaPath + MangaName + "/" + ChapterNames[index + 1].Replace(' ', '_') + ".ch";
+
+            //if next chapter downloaded exit method
+            if (File.Exists(NextchapterPath)) { currentDownloadTask = null; return; }
 
             //Next chapters url
             string NextUrl = _chapters[index + 1].url;
@@ -158,7 +251,7 @@ namespace Mago
                 token.ThrowIfCancellationRequested();
                 
                 //if page of chapter havent been downloaded
-                if (!(_chapters[SelectedChapterIndex + 1].imageTempPaths.Count >= i + 1 && _chapters[SelectedChapterIndex + 1].imageTempPaths[i] != null))
+                if (!(_chapters[(int)SelectedChapterIndex + 1].imageTempPaths.Count >= i + 1 && _chapters[(int)SelectedChapterIndex + 1].imageTempPaths[i] != null))
                 {
                     //Download the data to byte array
                     byte[] byteArray = DataConversionHelper.DownloadToArray(pagePaths[i]);
@@ -167,12 +260,28 @@ namespace Mago
                     string tempPath = SaveByteArrayToTempFile(byteArray);
 
                     //record temporary path
-                    _chapters[SelectedChapterIndex + 1].imageTempPaths.Add(tempPath);
+                    _chapters[(int)SelectedChapterIndex + 1].imageTempPaths.Add(tempPath);
                 }
                 
             }
 
+            if (MainViewModel.Settings.autoDownloadReadChapters)
+            {
+                //save the downloaded
+                SaveChapter((int)SelectedChapterIndex + 1, NextchapterPath);
+            }
+
             #endregion
+
+            currentDownloadTask = null;
+        }
+
+        void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            double bytesIn = double.Parse(e.BytesReceived.ToString());
+            double totalBytes = double.Parse(e.TotalBytesToReceive.ToString());
+            double percentage = bytesIn / totalBytes * 100;
+            PageDownloadValue = e.ProgressPercentage;
         }
 
         public async Task SetChapterData(ObservableCollection<ChapterInfo> infoList)
@@ -270,6 +379,23 @@ namespace Mago
             return image;
         }
         
+        public void SaveChapter(int index, string path)
+        {
+
+            List<byte[]> byteList = new List<byte[]>();
+            for (int i = 0; i < _chapters[index].imageTempPaths.Count; i++)
+            {
+                //new temp path
+                string temp = _chapters[index].imageTempPaths[i];
+
+                //load and add to byteList
+                byteList.Add(File.ReadAllBytes(temp));
+            }
+
+            //Create new chSave class and save to path
+            SaveSystem.SaveBinary(new ChSave(byteList), path);
+        }
+
         public void ClearTemporary()
         {
             //for all chapters
@@ -291,28 +417,24 @@ namespace Mago
         {
             URL = url;
         }
-
         public void AdvanceSelected()
         {
             SelectedChapterIndex += 1;
         }
-
         public void BackSelected()
         {
             SelectedChapterIndex -= 1;
         }
-
         public void CalculateChapterInfo()
         {
             NextChapterExists = SelectedChapterIndex < _chapters.Count - 1;
             LastChapterExists = SelectedChapterIndex > 0;
         }
-        
-        public void ApplyZoom()
+        public void ApplyZoom(float zoom)
         {
             foreach (var page in Pages)
             {
-                page.Zoom = (float)_zoom[_selectedZoomIndex] / 100f;
+                page.Zoom = zoom / 100f;
             }
         }
         public void ApplyMargin()
@@ -344,6 +466,15 @@ namespace Mago
         public ObservableCollection<int> Zoom => _zoom;
         public ObservableCollection<int> Margin => _margin;
 
+        public string MangaName
+        {
+            get { return _mangaName; }
+            set
+            {
+                if (_mangaName == value) return;
+                _mangaName = value;
+            }
+        }
         public int SelectedZoomIndex
         {
             get { return _selectedZoomIndex; }
@@ -351,7 +482,17 @@ namespace Mago
             {
                 if (_selectedZoomIndex == value) return;
                 _selectedZoomIndex = value;
-                ApplyZoom();
+                ApplyZoom((float)_zoom[_selectedZoomIndex]);
+            }
+        }
+        public float ZoomSlider
+        {
+            get{ return _zoomSlider; }
+            set
+            {
+                if (_zoomSlider == value) return;
+                _zoomSlider = value;
+                ApplyZoom(_zoomSlider);
             }
         }
         public int SelectedMarginIndex
@@ -364,13 +505,16 @@ namespace Mago
                 ApplyMargin();
             }
         }
-        public int SelectedChapterIndex
+        public int? SelectedChapterIndex
         {
             get => _selectedChapterIndex;
             set
             {
                 if (_selectedChapterIndex == value) return;
                 _selectedChapterIndex = value;
+
+                //if value if null, exit
+                if (_selectedChapterIndex == null) return;
 
                 //re set the buttons
                 CalculateChapterInfo();
@@ -386,13 +530,15 @@ namespace Mago
                 _ScrollTop = false;
 
                 //clear current pages
-                _pages.Clear();
-
+                if (_pages == null)
+                    _pages = new ObservableCollection<PageViewModel>();
+                else
+                    _pages.Clear();
+                
                 //assign new download task
-                currentDownloadTask = Task.Run(() => LoadChapterAsync(_selectedChapterIndex, newToken), newToken);
+                currentDownloadTask = Task.Run(() => LoadChapterAsync((int)_selectedChapterIndex, newToken), newToken);
             }
         }
-
         public bool IsTopBarOpen
         {
             get { return _isTopBarOpen; }
@@ -426,6 +572,42 @@ namespace Mago
             set
             {
                 _ScrollTop = value;
+            }
+        }
+        public int PageCount
+        {
+            get { return _pageCount; }
+            set
+            {
+                if (_pageCount == value) return;
+                _pageCount = value;
+            }
+        }
+        public int PagesDownloadValue
+        {
+            get { return _pagesDownloadValue; }
+            set
+            {
+                if (_pagesDownloadValue == value) return;
+                _pagesDownloadValue = value;
+            }
+        }
+        public int PageDownloadValue
+        {
+            get { return _pageDownloadValue; }
+            set
+            {
+                if (_pageDownloadValue == value) return;
+                _pageDownloadValue = value;
+            }
+        }
+        public Visibility CheckVisibility
+        {
+            get { return _checkVisibility; }
+            set
+            {
+                if (_checkVisibility == value) return;
+                _checkVisibility = value;
             }
         }
     }
